@@ -72,7 +72,7 @@ export async function demoRecognizeClothing(imageUrls: string[], userId: string)
       confidence: normalized.confidence,
     });
     const record: RecognitionRecord = {
-      id: createId("rec"),
+      id: createId(),
       userId,
       imageUrl,
       rawOutput: raw,
@@ -108,7 +108,7 @@ export async function generateDemoOutfits(items: StoredClothingItem[], occasion:
 
   return [
     {
-      id: createId("outfit"),
+      id: createId(),
       userId: items[0]?.userId ?? "demo",
       occasion,
       selectedItems: [...base, ...(outer ? [outer] : [])].map((item) => item.id),
@@ -121,7 +121,7 @@ export async function generateDemoOutfits(items: StoredClothingItem[], occasion:
       createdAt: timestamp,
     },
     {
-      id: createId("outfit"),
+      id: createId(),
       userId: items[0]?.userId ?? "demo",
       occasion,
       selectedItems: [...base, ...(accessory ? [accessory] : [])].map((item) => item.id),

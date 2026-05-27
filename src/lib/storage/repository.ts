@@ -1,4 +1,5 @@
 import type { ClothingCategory, ClothingItem } from "@/lib/domain/clothing";
+import { createSupabaseServerClient } from "@/lib/storage/supabase";
 
 export type StoredClothingItem = Required<
   Pick<
@@ -51,6 +52,47 @@ type ItemPatch = Partial<
   >
 >;
 
+export type ClothingItemRow = {
+  id: string;
+  user_id: string;
+  image_url: string;
+  category: ClothingCategory;
+  name: string;
+  colors: string[];
+  style_tags: string[];
+  season: string[];
+  formality: number;
+  confidence: number;
+  manually_edited: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+type RecognitionResultRow = {
+  id: string;
+  user_id: string;
+  image_url: string;
+  raw_output: unknown;
+  confidence: number;
+  status: RecognitionRecord["status"];
+  final_item_id: string | null;
+  created_at: string;
+};
+
+type OutfitCandidateRow = {
+  id: string;
+  user_id: string;
+  occasion: string;
+  selected_items: string[];
+  reason: string;
+  style: string;
+  color_logic: string;
+  user_action: OutfitCandidate["userAction"];
+  rank: number;
+  model_used: string;
+  created_at: string;
+};
+
 const memory = {
   items: new Map<string, StoredClothingItem>(),
   recognitions: new Map<string, RecognitionRecord>(),
@@ -62,8 +104,8 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-function id(prefix: string): string {
-  return `${prefix}_${globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)}`;
+function id(): string {
+  return globalThis.crypto?.randomUUID?.() ?? crypto.randomUUID();
 }
 
 export function createDemoItem(input: {
@@ -80,7 +122,7 @@ export function createDemoItem(input: {
   const timestamp = nowIso();
 
   return {
-    id: id("item"),
+    id: id(),
     userId: input.userId,
     imageUrl: input.imageUrl ?? "",
     category: input.category,
@@ -161,6 +203,275 @@ export const memoryRepository = {
   },
 };
 
-export const repository = memoryRepository;
+export function toClothingItemRow(item: StoredClothingItem): ClothingItemRow {
+  return {
+    id: item.id,
+    user_id: item.userId,
+    image_url: item.imageUrl,
+    category: item.category,
+    name: item.name,
+    colors: item.colors,
+    style_tags: item.styleTags,
+    season: item.season,
+    formality: item.formality,
+    confidence: item.confidence,
+    manually_edited: item.manuallyEdited,
+    created_at: item.createdAt,
+    updated_at: item.updatedAt,
+  };
+}
+
+export function toStoredClothingItem(row: ClothingItemRow): StoredClothingItem {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    imageUrl: row.image_url,
+    category: row.category,
+    name: row.name,
+    colors: row.colors,
+    styleTags: row.style_tags,
+    season: row.season,
+    formality: row.formality,
+    confidence: row.confidence,
+    manuallyEdited: row.manually_edited,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function toRecognitionResultRow(record: RecognitionRecord): RecognitionResultRow {
+  return {
+    id: record.id,
+    user_id: record.userId,
+    image_url: record.imageUrl,
+    raw_output: record.rawOutput,
+    confidence: record.confidence,
+    status: record.status,
+    final_item_id: record.finalItemId,
+    created_at: record.createdAt,
+  };
+}
+
+function toRecognitionRecord(row: RecognitionResultRow): RecognitionRecord {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    imageUrl: row.image_url,
+    rawOutput: row.raw_output,
+    confidence: row.confidence,
+    status: row.status,
+    finalItemId: row.final_item_id,
+    createdAt: row.created_at,
+  };
+}
+
+function toOutfitCandidateRow(outfit: OutfitCandidate): OutfitCandidateRow {
+  return {
+    id: outfit.id,
+    user_id: outfit.userId,
+    occasion: outfit.occasion,
+    selected_items: outfit.selectedItems,
+    reason: outfit.reason,
+    style: outfit.style,
+    color_logic: outfit.colorLogic,
+    user_action: outfit.userAction,
+    rank: outfit.rank,
+    model_used: outfit.modelUsed,
+    created_at: outfit.createdAt,
+  };
+}
+
+function toOutfitCandidate(row: OutfitCandidateRow): OutfitCandidate {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    occasion: row.occasion,
+    selectedItems: row.selected_items,
+    reason: row.reason,
+    style: row.style,
+    colorLogic: row.color_logic,
+    userAction: row.user_action,
+    rank: row.rank,
+    modelUsed: row.model_used,
+    createdAt: row.created_at,
+  };
+}
+
+function supabaseError(message: string): Error {
+  return new Error(`Supabase repository error: ${message}`);
+}
+
+export const supabaseRepository = {
+  async listItems(userId: string): Promise<StoredClothingItem[]> {
+    const client = createSupabaseServerClient();
+
+    if (!client) {
+      return memoryRepository.listItems(userId);
+    }
+
+    const { data, error } = await client
+      .from("clothing_items")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw supabaseError(error.message);
+    }
+
+    return (data as ClothingItemRow[]).map(toStoredClothingItem);
+  },
+
+  async saveItem(item: StoredClothingItem): Promise<StoredClothingItem> {
+    const client = createSupabaseServerClient();
+
+    if (!client) {
+      return memoryRepository.saveItem(item);
+    }
+
+    const { data, error } = await client.from("clothing_items").insert(toClothingItemRow(item)).select("*").single();
+
+    if (error) {
+      throw supabaseError(error.message);
+    }
+
+    return toStoredClothingItem(data as ClothingItemRow);
+  },
+
+  async updateItem(userId: string, itemId: string, patch: ItemPatch): Promise<StoredClothingItem | null> {
+    const client = createSupabaseServerClient();
+
+    if (!client) {
+      return memoryRepository.updateItem(userId, itemId, patch);
+    }
+
+    const rowPatch: Partial<ClothingItemRow> = {
+      name: patch.name,
+      category: patch.category,
+      colors: patch.colors,
+      style_tags: patch.styleTags,
+      season: patch.season,
+      formality: patch.formality,
+      confidence: patch.confidence,
+      manually_edited: patch.manuallyEdited,
+      updated_at: nowIso(),
+    };
+    const cleanPatch = Object.fromEntries(Object.entries(rowPatch).filter(([, value]) => value !== undefined));
+    const { data, error } = await client
+      .from("clothing_items")
+      .update(cleanPatch)
+      .eq("user_id", userId)
+      .eq("id", itemId)
+      .select("*")
+      .maybeSingle();
+
+    if (error) {
+      throw supabaseError(error.message);
+    }
+
+    return data ? toStoredClothingItem(data as ClothingItemRow) : null;
+  },
+
+  async saveRecognition(record: RecognitionRecord): Promise<RecognitionRecord> {
+    const client = createSupabaseServerClient();
+
+    if (!client) {
+      return memoryRepository.saveRecognition(record);
+    }
+
+    const { data, error } = await client
+      .from("recognition_results")
+      .insert(toRecognitionResultRow(record))
+      .select("*")
+      .single();
+
+    if (error) {
+      throw supabaseError(error.message);
+    }
+
+    return toRecognitionRecord(data as RecognitionResultRow);
+  },
+
+  async listRecognitions(userId: string): Promise<RecognitionRecord[]> {
+    const client = createSupabaseServerClient();
+
+    if (!client) {
+      return memoryRepository.listRecognitions(userId);
+    }
+
+    const { data, error } = await client.from("recognition_results").select("*").eq("user_id", userId);
+
+    if (error) {
+      throw supabaseError(error.message);
+    }
+
+    return (data as RecognitionResultRow[]).map(toRecognitionRecord);
+  },
+
+  async saveOutfits(outfits: OutfitCandidate[]): Promise<OutfitCandidate[]> {
+    const client = createSupabaseServerClient();
+
+    if (!client) {
+      return memoryRepository.saveOutfits(outfits);
+    }
+
+    if (outfits.length === 0) {
+      return [];
+    }
+
+    const { data, error } = await client.from("outfit_candidates").insert(outfits.map(toOutfitCandidateRow)).select("*");
+
+    if (error) {
+      throw supabaseError(error.message);
+    }
+
+    return (data as OutfitCandidateRow[]).map(toOutfitCandidate);
+  },
+
+  async acceptOutfit(userId: string, outfitId: string): Promise<OutfitCandidate | null> {
+    const client = createSupabaseServerClient();
+
+    if (!client) {
+      return memoryRepository.acceptOutfit(userId, outfitId);
+    }
+
+    const { data, error } = await client
+      .from("outfit_candidates")
+      .update({ user_action: "accepted" })
+      .eq("user_id", userId)
+      .eq("id", outfitId)
+      .select("*")
+      .maybeSingle();
+
+    if (error) {
+      throw supabaseError(error.message);
+    }
+
+    return data ? toOutfitCandidate(data as OutfitCandidateRow) : null;
+  },
+
+  async trackEvent(userId: string, eventName: string, metadata: unknown = {}): Promise<void> {
+    const client = createSupabaseServerClient();
+
+    if (!client) {
+      await memoryRepository.trackEvent(userId, eventName, metadata);
+      return;
+    }
+
+    const { error } = await client.from("usage_events").insert({
+      id: id(),
+      user_id: userId,
+      event_name: eventName,
+      metadata,
+      created_at: nowIso(),
+    });
+
+    if (error) {
+      throw supabaseError(error.message);
+    }
+  },
+};
+
+export const repository = supabaseRepository;
 
 export { id as createId, nowIso };

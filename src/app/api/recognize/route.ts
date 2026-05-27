@@ -11,17 +11,29 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "No images provided" }, { status: 400 });
   }
 
-  const results = await recognizeClothing(imageUrls, userId);
+  try {
+    const results = await recognizeClothing(imageUrls, userId);
 
-  for (const result of results) {
-    const savedItem = result.status === "auto_accepted" ? await repository.saveItem(result.item) : null;
-    await repository.saveRecognition({
-      ...result.record,
-      finalItemId: savedItem?.id ?? null,
+    for (const result of results) {
+      const savedItem = result.status === "auto_accepted" ? await repository.saveItem(result.item) : null;
+      await repository.saveRecognition({
+        ...result.record,
+        finalItemId: savedItem?.id ?? null,
+      });
+    }
+
+    await repository.trackEvent(userId, "wardrobe_item_recognized", {
+      count: results.length,
+      provider: process.env.OOTD_RECOGNITION_PROVIDER || "demo",
     });
+
+    return NextResponse.json({
+      results,
+      provider: process.env.OOTD_RECOGNITION_PROVIDER || "demo",
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Recognition failed";
+    console.error(error);
+    return NextResponse.json({ error: message }, { status: 502 });
   }
-
-  await repository.trackEvent(userId, "wardrobe_item_recognized", { count: results.length });
-
-  return NextResponse.json({ results });
 }

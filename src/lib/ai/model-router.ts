@@ -1,5 +1,6 @@
 import { confidenceTier, normalizeRecognitionItem } from "@/lib/domain/recognition";
 import { getWardrobeReadiness } from "@/lib/domain/outfits";
+import { recognizeWithOfoxAnthropic } from "@/lib/ai/ofox-anthropic";
 import type { RecognitionRecord, StoredClothingItem, OutfitCandidate } from "@/lib/storage/repository";
 import { createDemoItem, createId, nowIso } from "@/lib/storage/repository";
 
@@ -87,6 +88,10 @@ export async function demoRecognizeClothing(imageUrls: string[], userId: string)
 }
 
 export async function recognizeClothing(imageUrls: string[], userId: string): Promise<RecognitionResponse[]> {
+  if (process.env.OOTD_RECOGNITION_PROVIDER === "ofox-anthropic") {
+    return recognizeWithOfoxAnthropic(imageUrls, userId);
+  }
+
   return demoRecognizeClothing(imageUrls, userId);
 }
 

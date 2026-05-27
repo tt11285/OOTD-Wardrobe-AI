@@ -36,9 +36,17 @@ export default function UploadPage() {
       body: JSON.stringify({ userId, imageUrls: urls }),
     });
     const data = await response.json();
+
+    if (!response.ok) {
+      setResults([]);
+      setIsLoading(false);
+      setMessage(`识别失败：${data.error ?? "请检查模型 API 配置"}`);
+      return;
+    }
+
     setResults(data.results ?? []);
     setIsLoading(false);
-    setMessage(`已识别 ${data.results?.length ?? 0} 件衣物`);
+    setMessage(`已识别 ${data.results?.length ?? 0} 件衣物 · ${data.provider ?? "demo"}`);
   }
 
   async function saveReviewed(item: StoredClothingItem) {

@@ -301,21 +301,22 @@ export default function UploadPage() {
         />
         <label htmlFor="wardrobe-files" className={isLoading ? "upload-label uploading" : "upload-label"}>
           {isLoading ? (
-            <span className="upload-spinner" aria-hidden="true" />
+            <>
+              <span className="upload-spinner" aria-hidden="true" />
+              {phase === "compressing" ? "处理中…" : "AI 扫描识别中…"}
+            </>
+          ) : previews.length ? (
+            "继续上传更多衣服"
           ) : (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
+            <>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              选择 1-10 张衣物照片
+            </>
           )}
-          {isLoading
-            ? phase === "compressing"
-              ? "压缩中…"
-              : "AI 抠图 + 识别中…"
-            : previews.length
-              ? "继续上传更多衣服"
-              : "选择 1-10 张衣物照片"}
         </label>
 
         {/* Format hint */}

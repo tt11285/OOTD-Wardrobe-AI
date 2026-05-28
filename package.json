@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "NODE_USE_ENV_PROXY=1 next dev",
+    "build": "NODE_USE_ENV_PROXY=1 next build",
     "lint": "eslint .",
     "test": "vitest run"
   },

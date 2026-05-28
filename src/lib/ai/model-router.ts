@@ -1,6 +1,6 @@
 import { confidenceTier, normalizeRecognitionItem } from "@/lib/domain/recognition";
 import { getWardrobeReadiness } from "@/lib/domain/outfits";
-import { recognizeWithOfoxAnthropic } from "@/lib/ai/ofox-anthropic";
+import { recognizeWithOfoxAnthropic, recommendOutfitsWithOfoxAnthropic } from "@/lib/ai/ofox-anthropic";
 import type { RecognitionRecord, StoredClothingItem, OutfitCandidate } from "@/lib/storage/repository";
 import { createDemoItem, createId, nowIso } from "@/lib/storage/repository";
 
@@ -142,5 +142,21 @@ export async function generateDemoOutfits(items: StoredClothingItem[], occasion:
 }
 
 export async function generateOutfits(items: StoredClothingItem[], occasion: string): Promise<OutfitCandidate[]> {
+  // Use real Claude recommendations when ofox-anthropic is configured
+  if (process.env.OOTD_RECOGNITION_PROVIDER === "ofox-anthropic" && process.env.OFOX_API_KEY) {
+    try {
+      const userId = items[0]?.userId ?? "server-demo-user";
+      const realOutfits = await recommendOutfitsWithOfoxAnthropic(items, occasion, userId);
+      // If AI returned at least one valid outfit, use it
+      if (realOutfits.length > 0) {
+        return realOutfits;
+      }
+      // Otherwise fall through to deterministic fallback so the demo never breaks
+      console.warn("[outfit] AI returned 0 valid outfits, falling back to demo");
+    } catch (error) {
+      console.error("[outfit] AI generation failed, falling back to demo:", error);
+    }
+  }
+
   return generateDemoOutfits(items, occasion);
 }

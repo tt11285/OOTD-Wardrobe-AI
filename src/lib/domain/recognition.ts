@@ -28,8 +28,12 @@ type RawRecognitionItem = {
   confidence?: unknown;
 };
 
+// Tiers per PRD v2.3:
+// ≥ 0.85 → auto_accept (no user action needed)
+// 0.60 – 0.84 → needs_review (user confirms before saving)
+// < 0.60 → failed (prompt re-shoot)
 export function confidenceTier(confidence: number): RecognitionStatus {
-  if (!Number.isFinite(confidence) || confidence < 0.25) {
+  if (!Number.isFinite(confidence) || confidence < 0.6) {
     return "failed";
   }
 

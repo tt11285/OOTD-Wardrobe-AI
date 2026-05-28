@@ -188,15 +188,43 @@ h1 {
   clip: rect(0 0 0 0);
 }
 
-.upload-zone label {
+.upload-label {
   display: flex;
   min-height: 92px;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   border-radius: 8px;
   background: var(--ink);
   color: #fff;
   font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.upload-label:hover {
+  background: #2e2e2e;
+}
+
+.upload-label.uploading {
+  opacity: 0.75;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Spinner for upload loading state */
+.upload-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .upload-zone p,
@@ -204,6 +232,41 @@ h1 {
 .status-text {
   color: var(--muted);
   line-height: 1.6;
+}
+
+/* Format hint row below the upload button */
+.format-hint-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.format-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  border-radius: 999px;
+  padding: 0 9px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  background: #e8efe4;
+  color: #3e603c;
+}
+
+.format-badge--no {
+  background: #fce8e8;
+  color: #8b2020;
+}
+
+.format-hint-note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+  flex-basis: 100%;
+  padding-left: 2px;
 }
 
 .preview-grid,
@@ -249,10 +312,73 @@ h1 {
   grid-template-columns: 130px 1fr;
 }
 
-.review-card > img {
-  height: 100%;
-  min-height: 180px;
+.review-card--failed {
+  opacity: 0.65;
 }
+
+.review-card-image {
+  /* Fixed-size image cell */
+  width: 130px;
+  min-height: 180px;
+  overflow: hidden;
+  background: #eee8e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.review-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.review-card-no-image {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Status badge for failed items */
+.failed-badge {
+  background: #fce8e8;
+  color: #8b2020;
+}
+
+.failed-hint {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Status text variants */
+.status-text {
+  margin-top: 12px;
+}
+
+.status-done {
+  color: var(--sage);
+  font-weight: 600;
+}
+
+.status-error {
+  color: #8b2020;
+}
+
+/* Section titles for review groupings */
+.review-section {
+  margin-top: 24px;
+}
+
+.section-title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.warning-title { color: #8b5629; }
+.success-title { color: #3e603c; }
+.failed-title  { color: #8b2020; }
 
 .review-fields {
   display: grid;
@@ -326,10 +452,31 @@ h1 {
 .item-image-wrap {
   aspect-ratio: 1;
   background: #eee8e1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .item-image {
+  width: 100%;
   height: 100%;
+  object-fit: cover;
+}
+
+/* Placeholder shown when no real image is available */
+.item-no-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: #b5a99c;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 16px;
+  text-align: center;
 }
 
 .item-body,
@@ -373,6 +520,31 @@ h1 {
   aspect-ratio: 1;
 }
 
+.outfit-collage-fallback {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
+  background: #f3eee9;
+  color: var(--muted);
+  text-align: center;
+}
+
+.outfit-collage-fallback span {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+
+.outfit-collage-fallback small {
+  font-size: 11px;
+  line-height: 1.3;
+}
+
 .outfit-body h2,
 .empty-state h2 {
   margin: 0;
@@ -404,6 +576,11 @@ h1 {
 
   .review-card {
     grid-template-columns: 108px 1fr;
+  }
+
+  .review-card-image {
+    width: 108px;
+    min-height: 160px;
   }
 
   .screen-header h1 {

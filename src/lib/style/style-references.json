@@ -126,5 +126,181 @@
     "styleCategory": "细节原则",
     "occasionTags": ["通用", "休闲", "细节", "casual"],
     "colorPalette": ["棕", "中性色"]
+  },
+  {
+    "id": "commute-04",
+    "title": "半裙通勤的柔利落",
+    "description": "通勤想换个气质，用挺括的及膝半裙替代裤装：直筒或微A字裙配收身针织或衬衫，乐福鞋或低跟鞋收尾。裙摆带来柔和，硬挺面料保留专业感。",
+    "styleCategory": "柔和通勤",
+    "occasionTags": ["通勤", "commute", "上班", "办公室"],
+    "colorPalette": ["米白", "藏蓝", "棕"]
+  },
+  {
+    "id": "commute-05",
+    "title": "阔腿裤的从容利落",
+    "description": "高腰阔腿西裤配收身上衣，是显高又从容的通勤公式。上半身收、下半身放，比例立刻清楚；裤长盖住脚背最显腿长，配乐福鞋或踝靴。",
+    "styleCategory": "都市通勤",
+    "occasionTags": ["通勤", "commute", "显高", "办公室"],
+    "colorPalette": ["黑", "米白", "驼"]
+  },
+  {
+    "id": "commute-06",
+    "title": "同色系叠穿的高级通勤",
+    "description": "全身锁定一个色系的深浅变化（如米白到驼到棕），叠穿衬衫、针织、外套，单色拉长身形、天然显贵。最后用一件单品的材质差异制造层次。",
+    "styleCategory": "法式通勤",
+    "occasionTags": ["通勤", "commute", "单色", "高级"],
+    "colorPalette": ["米白", "驼", "棕"]
+  },
+  {
+    "id": "interview-03",
+    "title": "金融法律的保守正装",
+    "description": "金融、法律、咨询等保守行业面试，走标准正装：合身西装套装、白或浅蓝衬衫、深色皮鞋，配色锁定藏蓝灰黑。细节干净、无花哨，传递严谨可靠。",
+    "styleCategory": "标准正装",
+    "occasionTags": ["面试", "interview", "金融", "正装"],
+    "colorPalette": ["藏蓝", "灰", "白"]
+  },
+  {
+    "id": "interview-04",
+    "title": "温和职业的亲和面试",
+    "description": "教育、行政、文职类面试，正式度4但更温和：针织衫或软西装配直筒裤，加一点暖色调（燕麦、浅棕）增加亲和。整洁、不冷硬，让面试官感到好相处。",
+    "styleCategory": "亲和专业",
+    "occasionTags": ["面试", "interview", "行政", "教育"],
+    "colorPalette": ["燕麦", "浅棕", "米白"]
+  },
+  {
+    "id": "date-03",
+    "title": "白天约会的清爽减龄",
+    "description": "白天咖啡或逛街约会，走清爽路线：浅色针织或衬衫配高腰直筒裤或半裙，小白鞋或平底鞋。色彩明快柔和，整体轻盈、好亲近，不要过度隆重。",
+    "styleCategory": "清爽减龄",
+    "occasionTags": ["约会", "date", "白天", "咖啡"],
+    "colorPalette": ["米白", "浅蓝", "燕麦"]
+  },
+  {
+    "id": "date-04",
+    "title": "看展约会的文艺质感",
+    "description": "看展、书店类文艺约会，用有质感的廓形单品：oversize 衬衫或挺括风衣配直筒裤，配色克制、留一个利落细节。低调有想法，比亮眼更耐看。",
+    "styleCategory": "文艺质感",
+    "occasionTags": ["约会", "date", "看展", "文艺"],
+    "colorPalette": ["墨", "米白", "驼"]
+  },
+  {
+    "id": "casual-03",
+    "title": "旅行的舒适耐穿",
+    "description": "长途或一日游，舒适和耐看兼顾：弹力直筒裤或牛仔配软针织，外搭一件防风外套，鞋选干净小白鞋或乐福鞋。色彩耐脏的中性调，方便叠穿应对温差。",
+    "styleCategory": "旅行舒适",
+    "occasionTags": ["休闲", "旅行", "travel", "出行"],
+    "colorPalette": ["藏蓝", "米白", "灰"]
+  },
+  {
+    "id": "casual-04",
+    "title": "运动休闲的克制感",
+    "description": "想穿得运动又不邋遢，关键是克制：素色卫衣或针织配利落直筒裤，避免全身运动装；用一双干净的鞋和单一中性色统一画面。松弛但有型。",
+    "styleCategory": "运动休闲",
+    "occasionTags": ["休闲", "casual", "运动", "周末"],
+    "colorPalette": ["灰", "米白", "黑"]
+  },
+  {
+    "id": "casual-05",
+    "title": "周末市集的轻松随性",
+    "description": "周末逛市集、附近溜达，轻松随性最舒服：牛仔配素T或衬衫，搭一件开衫或外套备温差，帆布或乐福鞋。整体不用心机，干净舒展就好看。",
+    "styleCategory": "轻松随性",
+    "occasionTags": ["休闲", "casual", "周末", "市集"],
+    "colorPalette": ["藏蓝", "白", "驼"]
+  },
+  {
+    "id": "meeting-03",
+    "title": "上台演讲的镜头友好",
+    "description": "上台、演讲、被拍摄的场合，选纯色、避免细密条纹（上镜易花）。合身外套加强肩部轮廓显气场，深中性配色稳重，一个克制亮点（如丝巾）提精神。",
+    "styleCategory": "镜头友好",
+    "occasionTags": ["重要会议", "meeting", "演讲", "上台"],
+    "colorPalette": ["藏蓝", "墨", "米白"]
+  },
+  {
+    "id": "event-01",
+    "title": "婚礼宾客的得体不抢镜",
+    "description": "作为婚礼宾客，得体且不抢新人风头：柔和缎面或针织连衣裙、半裙套装，避免纯白和大红。配色温柔（藕、雾蓝、燕麦），配饰精致点到为止。",
+    "styleCategory": "优雅宾客",
+    "occasionTags": ["婚礼", "正式活动", "event", "宴会"],
+    "colorPalette": ["藕", "雾蓝", "燕麦"]
+  },
+  {
+    "id": "event-02",
+    "title": "正式晚宴的低调隆重",
+    "description": "正式晚宴走低调隆重：深色缎面或丝感单品，剪裁利落的连衣裙或西装套装，配金属或皮质配饰点睛。一个重心（颜色或材质）即可，避免堆砌。",
+    "styleCategory": "晚宴正式",
+    "occasionTags": ["晚宴", "正式活动", "event", "宴会"],
+    "colorPalette": ["墨", "藏蓝", "金"]
+  },
+  {
+    "id": "family-01",
+    "title": "见家长的稳重亲和",
+    "description": "见家长要稳重又亲切：避免太前卫或暴露，选整洁的针织、衬衫配直筒裤或及膝裙，暖色中性调显温和。干净、有教养感，比时髦更重要。",
+    "styleCategory": "稳重亲和",
+    "occasionTags": ["见家长", "family", "正式", "拜访"],
+    "colorPalette": ["米白", "燕麦", "藏蓝"]
+  },
+  {
+    "id": "rule-texture-01",
+    "title": "材质混搭出层次",
+    "description": "同色系里靠材质差异制造层次：针织的软、衬衫的挺、皮革的亮、羊毛的哑放在一起，画面不平、更高级。颜色越简，越要靠材质丰富它。",
+    "styleCategory": "材质原则",
+    "occasionTags": ["通用", "材质", "层次"],
+    "colorPalette": ["中性色"]
+  },
+  {
+    "id": "rule-accessory-01",
+    "title": "配饰点睛的克制",
+    "description": "配饰一套留一个焦点就够：一条腰带、一副耳饰、一个包，三选一作为重心，其余从简。过多配饰会分散视觉、拉低质感。",
+    "styleCategory": "配饰原则",
+    "occasionTags": ["通用", "配饰", "细节"],
+    "colorPalette": ["中性色", "金"]
+  },
+  {
+    "id": "rule-shoe-bag-01",
+    "title": "鞋包呼应的完整感",
+    "description": "鞋和包的颜色或材质相呼应，整体立刻显得完整、有计划感。不必完全同色，同一色系或同为皮质即可。这是低成本提升精致度的技巧。",
+    "styleCategory": "配饰原则",
+    "occasionTags": ["通用", "鞋包", "细节"],
+    "colorPalette": ["棕", "黑", "中性色"]
+  },
+  {
+    "id": "rule-monochrome-01",
+    "title": "单色显高的拉伸",
+    "description": "上下同色（尤其深色）能在视觉上拉成一条直线，显高显瘦。想强调身高或想低调高级时，单色搭配最稳，再用材质或配饰避免单调。",
+    "styleCategory": "比例原则",
+    "occasionTags": ["通用", "显高", "单色", "比例"],
+    "colorPalette": ["黑", "藏蓝", "墨"]
+  },
+  {
+    "id": "rule-silhouette-01",
+    "title": "廓形对比的高级感",
+    "description": "上下廓形做对比：宽松上衣配收身下装，或贴身上衣配阔腿/伞裙。一松一紧让身形有重点、不臃肿。全身都松或都紧都容易失去线条。",
+    "styleCategory": "比例原则",
+    "occasionTags": ["通用", "廓形", "比例", "proportion"],
+    "colorPalette": ["中性色"]
+  },
+  {
+    "id": "rule-layer-01",
+    "title": "换季叠层的呼吸感",
+    "description": "换季叠穿讲究厚薄递进：贴身薄、中层针织、外层挺括外套，长短错落露出层次。颜色仍控制在三色内，叠得多也不乱。",
+    "styleCategory": "季节原则",
+    "occasionTags": ["通用", "换季", "叠穿", "季节"],
+    "colorPalette": ["驼", "米白", "藏蓝"]
+  },
+  {
+    "id": "rule-skin-01",
+    "title": "露肤平衡的分寸",
+    "description": "露肤遵循'露一处'原则：露了腿就收上半身，露了肩颈就下装利落保守。同时露多处易显刻意，留白反而更高级、更耐看。",
+    "styleCategory": "分寸原则",
+    "occasionTags": ["通用", "露肤", "分寸"],
+    "colorPalette": ["中性色"]
+  },
+  {
+    "id": "rule-print-01",
+    "title": "图案克制的安全感",
+    "description": "图案一套只留一件主角，其余用纯色衬托。正式或重要场合优先纯色或极细纹理，图案越大越抢、越难搭，也越容易显廉价。",
+    "styleCategory": "色彩原则",
+    "occasionTags": ["通用", "图案", "配色"],
+    "colorPalette": ["中性色"]
   }
 ]

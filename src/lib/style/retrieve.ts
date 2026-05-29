@@ -12,7 +12,7 @@ import embeddedRaw from "@/lib/style/style-references.embedded.json";
 
 const embedded = embeddedRaw as EmbeddedStyleReference[];
 
-function keywordMatch(occasion: string, k: number): StyleReference[] {
+export function rankStyleReferencesByKeyword(occasion: string, k: number): StyleReference[] {
   const q = occasion.trim().toLowerCase();
   const scored = styleReferences.map((ref) => {
     let score = 0;
@@ -50,7 +50,7 @@ export async function retrieveStyleReferences(occasion: string, k = 4): Promise<
   }
 
   // Fallback: keyword overlap.
-  return keywordMatch(occasion, k);
+  return rankStyleReferencesByKeyword(occasion, k);
 }
 
 export function formatReferencesForPrompt(refs: StyleReference[]): string {

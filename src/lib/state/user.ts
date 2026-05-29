@@ -31,7 +31,9 @@ export function useAuth(): AuthState {
   useEffect(() => {
     const supabase = getBrowserSupabase();
     if (!supabase) {
-      setReady(true);
+      // No auth configured — resolve ready off the effect body (avoids a
+      // synchronous setState-in-effect, which React 19 discourages).
+      queueMicrotask(() => setReady(true));
       return;
     }
 

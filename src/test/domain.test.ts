@@ -45,4 +45,21 @@ describe("occasion domain", () => {
   it("maps interview to high formality", () => {
     expect(occasionHint("面试").formality).toBe(4);
   });
+
+  it("maps English occasion labels too", () => {
+    expect(occasionHint("Interview").formality).toBe(4);
+    expect(occasionHint("Casual").formality).toBe(2);
+    expect(occasionHint("Meeting").formality).toBe(4);
+  });
+
+  it("matches English free-text occasions case-insensitively", () => {
+    expect(occasionHint("interview tomorrow").formality).toBe(4);
+    expect(occasionHint("weekend trip").style).toBe("轻松舒适");
+  });
+
+  it("falls back to a sensible default for unknown occasions", () => {
+    const hint = occasionHint("zzz");
+    expect(hint.formality).toBe(3);
+    expect(hint.label).toBe("zzz");
+  });
 });

@@ -33,7 +33,6 @@ export default function OutfitsPage() {
   // Cycle the "AI is working" copy so loading feels alive, not a dead spinner.
   useEffect(() => {
     if (!isLoading) return;
-    setPhraseIdx(0);
     const timer = setInterval(() => {
       setPhraseIdx((index) => (index + 1) % loadingPhrases.length);
     }, 1100);
@@ -42,6 +41,7 @@ export default function OutfitsPage() {
 
   async function generate() {
     setIsLoading(true);
+    setPhraseIdx(0);
     setAcceptedId(null);
     setActiveIdx(0);
     setMessage("");

@@ -35,7 +35,13 @@ function isRealImage(url: string): boolean {
   return false;
 }
 
-export function ItemCard({ item }: { item: StoredClothingItem }) {
+export function ItemCard({
+  item,
+  onEdit,
+}: {
+  item: StoredClothingItem;
+  onEdit?: (item: StoredClothingItem) => void;
+}) {
   return (
     <article className="item-card">
       <div className="item-image-wrap">
@@ -44,6 +50,19 @@ export function ItemCard({ item }: { item: StoredClothingItem }) {
         ) : (
           <NoImagePlaceholder name={item.name} />
         )}
+        {onEdit ? (
+          <button
+            className="item-edit-btn"
+            type="button"
+            onClick={() => onEdit(item)}
+            aria-label={`Edit ${item.name}`}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
+          </button>
+        ) : null}
       </div>
       <div className="item-body">
         <div>

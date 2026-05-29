@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/state/user";
 
 const links = [
   { href: "/upload", label: "ADD" },
@@ -12,6 +13,7 @@ const links = [
 // Desktop-only primary navigation. Hidden on mobile (bottom nav takes over).
 export function TopNav() {
   const pathname = usePathname();
+  const { signedIn, email, ready } = useAuth();
 
   return (
     <header className="top-nav">
@@ -33,6 +35,9 @@ export function TopNav() {
           );
         })}
       </nav>
+      <Link href="/login" className="top-nav-auth">
+        {ready && signedIn ? (email ?? "Account") : "Sign in"}
+      </Link>
     </header>
   );
 }

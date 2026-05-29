@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { BottomNav } from "@/components/bottom-nav";
-import { getAnonymousUserId } from "@/lib/state/user";
+import { useAuth } from "@/lib/state/user";
+import { authedFetch } from "@/lib/api/authed-fetch";
 import type { StoredClothingItem } from "@/lib/storage/repository";
 import { clothingCategories, type ClothingCategory } from "@/lib/domain/clothing";
 import { categoryLabel } from "@/lib/domain/outfits";
@@ -151,7 +152,7 @@ async function compressImage(file: File): Promise<string> {
 
 // ─── Upload page ─────────────────────────────────────────────────────────────
 export default function UploadPage() {
-  const userId = useMemo(() => getAnonymousUserId(), []);
+  const { userId } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // previews: compressed base64 URLs stored CLIENT-SIDE only.
@@ -207,7 +208,7 @@ export default function UploadPage() {
       imageProcessedCount?: number;
     };
     try {
-      const response = await fetch("/api/recognize", {
+      const response = await authedFetch("/api/recognize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, imageUrls: compressed }),
@@ -268,7 +269,7 @@ export default function UploadPage() {
   }
 
   async function saveReviewed(item: StoredClothingItem) {
-    await fetch("/api/items", {
+    await authedFetch("/api/items", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...item, userId, manuallyEdited: true }),

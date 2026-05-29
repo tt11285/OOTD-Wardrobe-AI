@@ -1,22 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { BottomNav } from "@/components/bottom-nav";
 import { EmptyState } from "@/components/empty-state";
 import { ItemCard } from "@/components/item-card";
 import { clothingCategories, type ClothingCategory } from "@/lib/domain/clothing";
 import { categoryLabel } from "@/lib/domain/outfits";
-import { getAnonymousUserId } from "@/lib/state/user";
+import { useAuth } from "@/lib/state/user";
+import { authedFetch } from "@/lib/api/authed-fetch";
 import type { StoredClothingItem } from "@/lib/storage/repository";
 
 export default function WardrobePage() {
-  const userId = useMemo(() => getAnonymousUserId(), []);
+  const { userId } = useAuth();
   const [items, setItems] = useState<StoredClothingItem[]>([]);
   const [filter, setFilter] = useState<ClothingCategory | "all">("all");
   const [editing, setEditing] = useState<StoredClothingItem | null>(null);
 
   useEffect(() => {
-    fetch(`/api/items?userId=${encodeURIComponent(userId)}`)
+    authedFetch(`/api/items?userId=${encodeURIComponent(userId)}`)
       .then((response) => response.json())
       .then((data) => setItems(data.items ?? []));
   }, [userId]);
@@ -93,7 +94,7 @@ function EditItemModal({
     setSaving(true);
     setError("");
     try {
-      const response = await fetch("/api/items", {
+      const response = await authedFetch("/api/items", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

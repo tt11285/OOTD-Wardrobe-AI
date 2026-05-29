@@ -1,18 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BottomNav } from "@/components/bottom-nav";
 import { EmptyState } from "@/components/empty-state";
 import { OutfitCard } from "@/components/outfit-card";
 import { occasionTags } from "@/lib/domain/occasion";
 import { categoryLabel } from "@/lib/domain/outfits";
-import { getAnonymousUserId } from "@/lib/state/user";
+import { useAuth } from "@/lib/state/user";
+import { authedFetch } from "@/lib/api/authed-fetch";
 import type { OutfitCandidate, StoredClothingItem } from "@/lib/storage/repository";
 
 const loadingPhrases = ["Opening your wardrobe…", "Consulting the style library…", "Matching pieces…", "Writing the rationale…"];
 
 export default function OutfitsPage() {
-  const userId = useMemo(() => getAnonymousUserId(), []);
+  const { userId } = useAuth();
   const [occasion, setOccasion] = useState("Commute");
   const [items, setItems] = useState<StoredClothingItem[]>([]);
   const [outfits, setOutfits] = useState<OutfitCandidate[]>([]);
@@ -24,7 +25,7 @@ export default function OutfitsPage() {
   const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch(`/api/items?userId=${encodeURIComponent(userId)}`)
+    authedFetch(`/api/items?userId=${encodeURIComponent(userId)}`)
       .then((response) => response.json())
       .then((data) => setItems(data.items ?? []));
   }, [userId]);
@@ -44,7 +45,7 @@ export default function OutfitsPage() {
     setAcceptedId(null);
     setActiveIdx(0);
     setMessage("");
-    const response = await fetch("/api/outfits", {
+    const response = await authedFetch("/api/outfits", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, occasion }),
@@ -67,7 +68,7 @@ export default function OutfitsPage() {
   async function accept(outfitId: string) {
     setAcceptedId(outfitId);
     setMessage("Saved — enjoy your day.");
-    await fetch("/api/outfits", {
+    await authedFetch("/api/outfits", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, outfitId }),

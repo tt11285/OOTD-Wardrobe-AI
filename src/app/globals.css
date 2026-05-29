@@ -1119,6 +1119,7 @@ h1 {
 /* ─── Top nav (desktop only) ──────────────────────────────────────────────────── */
 .top-nav {
   display: none;                 /* mobile-first: hidden, bottom nav rules instead */
+  position: relative;
 }
 
 .top-nav-inner {
@@ -1128,6 +1129,25 @@ h1 {
   gap: 36px;
   padding: 22px 24px;
 }
+
+.top-nav-auth {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  transition: color 0.18s ease;
+}
+
+.top-nav-auth:hover { color: var(--accent); }
 
 .top-nav-brand,
 .top-nav-link {

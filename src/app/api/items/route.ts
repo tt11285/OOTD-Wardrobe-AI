@@ -2,16 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { isClothingCategory, normalizeStringList, clampFormality } from "@/lib/domain/clothing";
 import { createDemoItem, repository } from "@/lib/storage/repository";
 import { uploadImageToStorage } from "@/lib/storage/supabase";
+import { getRequestUserId } from "@/lib/supabase/request-user";
 
 export async function GET(request: NextRequest) {
-  const userId = request.nextUrl.searchParams.get("userId") || "server-demo-user";
+  const userId = await getRequestUserId(request, request.nextUrl.searchParams.get("userId") || "server-demo-user");
   const items = await repository.listItems(userId);
   return NextResponse.json({ items });
 }
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const userId = String(body.userId || "server-demo-user");
+  const userId = await getRequestUserId(request, String(body.userId || "server-demo-user"));
   const category = isClothingCategory(body.category) ? body.category : "accessory";
 
   // If the caller sent a base64 data URL (manually-confirmed item from upload page),
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   const body = await request.json();
-  const userId = String(body.userId || "server-demo-user");
+  const userId = await getRequestUserId(request, String(body.userId || "server-demo-user"));
   const itemId = String(body.itemId || "");
   const updated = await repository.updateItem(userId, itemId, {
     name: typeof body.name === "string" ? body.name : undefined,

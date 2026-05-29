@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateOutfits } from "@/lib/ai/model-router";
 import { getWardrobeReadiness } from "@/lib/domain/outfits";
 import { repository } from "@/lib/storage/repository";
+import { getRequestUserId } from "@/lib/supabase/request-user";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const userId = String(body.userId || "server-demo-user");
+  const userId = await getRequestUserId(request, String(body.userId || "server-demo-user"));
   const occasion = String(body.occasion || "通勤");
   const items = await repository.listItems(userId);
   const readiness = getWardrobeReadiness(items);
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   const body = await request.json();
-  const userId = String(body.userId || "server-demo-user");
+  const userId = await getRequestUserId(request, String(body.userId || "server-demo-user"));
   const outfitId = String(body.outfitId || "");
   const accepted = await repository.acceptOutfit(userId, outfitId);
 

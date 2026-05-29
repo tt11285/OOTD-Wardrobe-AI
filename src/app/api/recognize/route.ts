@@ -3,10 +3,11 @@ import { recognizeClothing } from "@/lib/ai/model-router";
 import { extractMany } from "@/lib/ai/gemini-image";
 import { repository } from "@/lib/storage/repository";
 import { uploadImageToStorage } from "@/lib/storage/supabase";
+import { getRequestUserId } from "@/lib/supabase/request-user";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const userId = String(body.userId || "server-demo-user");
+  const userId = await getRequestUserId(request, String(body.userId || "server-demo-user"));
   const imageUrls = Array.isArray(body.imageUrls) ? body.imageUrls.map(String).slice(0, 10) : [];
 
   if (imageUrls.length === 0) {

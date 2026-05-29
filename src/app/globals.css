@@ -228,7 +228,7 @@ h1 {
   left:  max(16px, calc((100vw - 780px) / 2 + 16px));
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 6px;
   border: 1px solid var(--line-glass);
   border-radius: var(--r-xl);

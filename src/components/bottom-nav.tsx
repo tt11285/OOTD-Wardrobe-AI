@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Camera, Grid2X2, Sparkles } from "lucide-react";
+import { Camera, Grid2X2, Sparkles, User } from "lucide-react";
 
 const links = [
   { href: "/upload",   label: "ADD",       icon: Camera   },
   { href: "/wardrobe", label: "WARDROBE",  icon: Grid2X2  },
   { href: "/outfits",  label: "OUTFITS",   icon: Sparkles },
+  { href: "/login",    label: "ACCOUNT",   icon: User     },
 ];
 
 export function BottomNav() {

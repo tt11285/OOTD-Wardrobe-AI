@@ -1,0 +1,130 @@
+[
+  {
+    "id": "commute-01",
+    "title": "白衬衫 + 直筒西裤的通勤底色",
+    "description": "通勤最稳的骨架是挺括白衬衫配高腰直筒西裤，乐福鞋收尾。白衬衫提供干净的呼吸感，直筒裤拉直腿部线条，正式度刚好落在3到4，既专业又不死板。",
+    "styleCategory": "都市通勤",
+    "occasionTags": ["通勤", "commute", "上班", "办公室"],
+    "colorPalette": ["米白", "黑", "棕"]
+  },
+  {
+    "id": "commute-02",
+    "title": "针织开衫的松弛通勤",
+    "description": "想让通勤不那么硬，用细腻针织开衫替代西装外套，内搭素色T或衬衫，下装保持利落的直筒或锥形裤。针织带来柔软的高级感，适合相对轻松的工作日。",
+    "styleCategory": "柔和通勤",
+    "occasionTags": ["通勤", "commute", "周五", "轻松工作日"],
+    "colorPalette": ["燕麦", "藏蓝", "驼"]
+  },
+  {
+    "id": "commute-03",
+    "title": "风衣叠穿增加气场",
+    "description": "早晚温差大的通勤日，在基础套装外叠一件挺括驼色风衣，廓形利落、流畅线条让整体更有气场。驼色与棕色鞋履呼应，层次丰富但不杂乱。",
+    "styleCategory": "法式通勤",
+    "occasionTags": ["通勤", "commute", "春秋", "换季"],
+    "colorPalette": ["驼", "米白", "棕"]
+  },
+  {
+    "id": "interview-01",
+    "title": "面试的可信感配色",
+    "description": "面试要传递可信与干练，优先低饱和中性色：藏蓝、灰、米白。避免大面积亮色和强图案。一套衬衫加西装外套加直筒裤加低跟鞋的组合，正式度4，让对方第一眼就觉得稳妥。",
+    "styleCategory": "干练可信",
+    "occasionTags": ["面试", "interview", "求职", "offer"],
+    "colorPalette": ["藏蓝", "灰", "米白"]
+  },
+  {
+    "id": "interview-02",
+    "title": "降低紧绷感的面试搭配",
+    "description": "全套太正式反而紧绷，用一件米白衬衫降低西装的严肃感、增加亲和力。鞋履选简洁低跟或乐福鞋，细节克制。既显专业又让人放松，适合创意类或互联网岗位。",
+    "styleCategory": "亲和专业",
+    "occasionTags": ["面试", "interview", "互联网", "创意岗"],
+    "colorPalette": ["米白", "灰", "黑"]
+  },
+  {
+    "id": "date-01",
+    "title": "约会的柔和精致",
+    "description": "约会想要柔和精致，可用一件质感针织或丝感上衣，配半身裙或高腰直筒裤，加一个精致配饰作为亮点。色彩偏柔和的米、藕、燕麦，营造亲近又有心思的氛围。",
+    "styleCategory": "柔和精致",
+    "occasionTags": ["约会", "date", "晚餐", "见面"],
+    "colorPalette": ["藕", "米白", "燕麦"]
+  },
+  {
+    "id": "date-02",
+    "title": "晚餐约会的低调高级",
+    "description": "晚餐约会用深色调更显高级：藏蓝或墨色上衣配同色系下装，利用单色搭配拉长身形，再用金属或皮质配饰点睛。整体克制但有质感，适合稍正式的餐厅。",
+    "styleCategory": "晚装精致",
+    "occasionTags": ["约会", "date", "晚餐", "餐厅"],
+    "colorPalette": ["藏蓝", "墨", "棕"]
+  },
+  {
+    "id": "casual-01",
+    "title": "周末的轻松舒适",
+    "description": "周末休闲讲究舒适不邋遢：牛仔裤配素色T或卫衣，外搭一件挺括外套或衬衫作为精致锚点。鞋履用干净的小白鞋或乐福鞋。松弛但保留一个利落的细节，就不会显得随便。",
+    "styleCategory": "轻松舒适",
+    "occasionTags": ["休闲", "casual", "周末", "逛街"],
+    "colorPalette": ["藏蓝", "白", "灰"]
+  },
+  {
+    "id": "casual-02",
+    "title": "牛仔裤的通勤化",
+    "description": "想让牛仔裤胜任轻通勤，选深色直筒牛仔配挺括衬衫或针织，鞋履升级成乐福鞋而非运动鞋。深色牛仔提升正式度，精致鞋款提升质感，适合周五或氛围轻松的办公室。",
+    "styleCategory": "休闲通勤",
+    "occasionTags": ["休闲", "casual", "周五", "通勤"],
+    "colorPalette": ["藏蓝", "米白", "棕"]
+  },
+  {
+    "id": "meeting-01",
+    "title": "重要会议的克制专业",
+    "description": "见客户或做汇报，需要克制专业：深色西装外套加同色或中性下装，内搭素色衬衫，正式度4到5。整套主色不超过三种，避免抢眼图案，让对方注意力集中在你说的内容上。",
+    "styleCategory": "克制专业",
+    "occasionTags": ["重要会议", "meeting", "客户", "汇报"],
+    "colorPalette": ["藏蓝", "灰", "白"]
+  },
+  {
+    "id": "meeting-02",
+    "title": "汇报日的结构感",
+    "description": "汇报场合用有结构感的廓形传递掌控力：肩线利落的外套加直筒裤，鞋履低调。配色锁定深中性，细节如腰带或简洁手表增加完成度。整体干净、有重量感、不花哨。",
+    "styleCategory": "结构利落",
+    "occasionTags": ["重要会议", "meeting", "汇报", "演讲"],
+    "colorPalette": ["墨", "灰", "米白"]
+  },
+  {
+    "id": "rule-color-01",
+    "title": "三色原则",
+    "description": "一套搭配的主色控制在三种以内，画面才干净有呼吸感。多于三色容易显得杂乱、降低高级感。用中性色打底，留一个颜色或材质做重心。",
+    "styleCategory": "色彩原则",
+    "occasionTags": ["通用", "配色", "color"],
+    "colorPalette": ["中性色"]
+  },
+  {
+    "id": "rule-color-02",
+    "title": "中性色的高级感",
+    "description": "米白、燕麦、驼、灰、藏蓝、墨这类低饱和中性色彼此都好搭，天然显高级。把它们作为衣橱主轴，再用小面积的暖棕或金属点缀温度，几乎不会出错。",
+    "styleCategory": "色彩原则",
+    "occasionTags": ["通用", "配色", "color"],
+    "colorPalette": ["米白", "驼", "藏蓝", "墨"]
+  },
+  {
+    "id": "rule-proportion-01",
+    "title": "上下松紧的比例平衡",
+    "description": "上宽下窄或上紧下松能让比例更清楚：宽上衣配直筒或锥形裤，贴身上衣配阔腿或半裙。高腰线是拉长腿部、稳定重心的关键。",
+    "styleCategory": "比例原则",
+    "occasionTags": ["通用", "比例", "proportion"],
+    "colorPalette": ["中性色"]
+  },
+  {
+    "id": "rule-formality-01",
+    "title": "正式度匹配场合",
+    "description": "让全身单品的平均正式度贴近场合需求，误差不超过1。面试、重要会议落在4到5，通勤3到4，约会3，休闲2。一个精致单品（皮鞋、挺括外套）可以拉高整体正式度。",
+    "styleCategory": "正式度原则",
+    "occasionTags": ["通用", "正式度", "formality"],
+    "colorPalette": ["中性色"]
+  },
+  {
+    "id": "rule-anchor-01",
+    "title": "休闲里的精致锚点",
+    "description": "越是休闲的搭配，越需要一个精致锚点把整体托起来：一双皮质乐福鞋、一条好腰带、一件挺括外套。锚点让随性看起来是有意为之，而不是随便。",
+    "styleCategory": "细节原则",
+    "occasionTags": ["通用", "休闲", "细节", "casual"],
+    "colorPalette": ["棕", "中性色"]
+  }
+]

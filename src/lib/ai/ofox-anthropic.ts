@@ -1,6 +1,7 @@
 import { confidenceTier, normalizeRecognitionItem } from "@/lib/domain/recognition";
 import { occasionHint } from "@/lib/domain/occasion";
 import { stylePromptContext } from "@/lib/style/style-rules";
+import { retrieveStyleReferences, formatReferencesForPrompt } from "@/lib/style/retrieve";
 import { createDemoItem, createId, nowIso, type OutfitCandidate, type RecognitionRecord, type StoredClothingItem } from "@/lib/storage/repository";
 
 type AnthropicTextBlock = {
@@ -256,9 +257,16 @@ export async function recommendOutfitsWithOfoxAnthropic(
     formality: item.formality,
   }));
 
+  // RAG: pull the most relevant aesthetic cases for this occasion (best-effort).
+  const references = await retrieveStyleReferences(occasion, 4);
+  const referencesBlock = formatReferencesForPrompt(references);
+
   const userPrompt = [
     "你是一位法式极简风格 + 都市通勤美学的造型师。",
     stylePromptContext(hint),
+    ...(referencesBlock
+      ? ["", "【参考案例（审美知识库召回，供参考，不要照抄）】", referencesBlock]
+      : []),
     "",
     "下面是用户**真实衣橱**（请只引用这里的 id，不要编造）：",
     JSON.stringify(wardrobeSummary, null, 2),

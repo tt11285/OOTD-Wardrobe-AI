@@ -1103,10 +1103,9 @@ h1 {
 .phone-screen {
   display: flex;
   flex-direction: column;
-  gap: 7px;
   width: 100%;
   height: 100%;
-  padding: 10px 11px 12px;
+  padding: 10px 11px 9px;
   border-radius: 26px;
   background: var(--background);
   overflow: hidden;
@@ -1116,7 +1115,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1px 4px 0;
+  padding: 1px 4px 6px;
   font-size: 8.5px;
   font-weight: 700;
   color: var(--ink);
@@ -1130,21 +1129,40 @@ h1 {
   opacity: 0.5;
 }
 
-.phone-nav {
+/* Screen content area — fills the space above the tab bar */
+.phone-body {
+  flex: 1;
   display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 0;
+}
+
+/* Bottom tab bar — like a real mobile app */
+.phone-tabbar {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  gap: 2px;
+  margin: 6px -4px 0;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+}
+
+.phone-tab {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 4px 0 6px;
-  border-bottom: 1px solid var(--line);
-  font-size: 6.5px;
+  gap: 2px;
+  font-size: 5.5px;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   color: var(--muted-light);
 }
 
-.phone-nav-brand { color: var(--accent); letter-spacing: 0.08em; }
-.phone-nav-link.active { color: var(--ink); }
+.phone-tab svg { display: block; }
+
+.phone-tab.active { color: var(--ink); }
 
 .phone-eyebrow {
   margin: 3px 0 0;

@@ -51,7 +51,7 @@ export function OutfitCard({
       <div className="outfit-body">
         <div className="outfit-head">
           <p className="outfit-style">{outfit.style}</p>
-          {accepted ? <span className="status-badge success">今天就穿这套</span> : null}
+          {accepted ? <span className="status-badge success">Today&apos;s pick</span> : null}
         </div>
 
         <h2>{outfit.reason}</h2>
@@ -71,7 +71,7 @@ export function OutfitCard({
           aria-expanded={expanded}
           onClick={() => setExpanded((value) => !value)}
         >
-          为什么这样搭
+          Why this look
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
             <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -80,12 +80,12 @@ export function OutfitCard({
         {expanded ? (
           <div className="outfit-detail">
             <p>
-              <strong>色彩</strong>
+              <strong>Color</strong>
               {outfit.colorLogic}
             </p>
             <p>
-              <strong>风格</strong>
-              {outfit.style} · 正式度与场合匹配，单品都来自你的真实衣橱。
+              <strong>Style</strong>
+              {outfit.style} · formality matched to the occasion, every piece from your own wardrobe.
             </p>
           </div>
         ) : null}
@@ -96,7 +96,7 @@ export function OutfitCard({
           type="button"
           disabled={accepted}
         >
-          {accepted ? "✓ 已选定" : "今天就穿这套"}
+          {accepted ? "✓ Selected" : "Wear this today"}
         </button>
       </div>
     </article>

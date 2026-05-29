@@ -5,14 +5,15 @@ import { BottomNav } from "@/components/bottom-nav";
 import { EmptyState } from "@/components/empty-state";
 import { OutfitCard } from "@/components/outfit-card";
 import { occasionTags } from "@/lib/domain/occasion";
+import { categoryLabel } from "@/lib/domain/outfits";
 import { getAnonymousUserId } from "@/lib/state/user";
 import type { OutfitCandidate, StoredClothingItem } from "@/lib/storage/repository";
 
-const loadingPhrases = ["正在翻你的衣橱…", "正在调用审美库…", "正在搭配单品…", "正在写搭配理由…"];
+const loadingPhrases = ["Opening your wardrobe…", "Consulting the style library…", "Matching pieces…", "Writing the rationale…"];
 
 export default function OutfitsPage() {
   const userId = useMemo(() => getAnonymousUserId(), []);
-  const [occasion, setOccasion] = useState("通勤");
+  const [occasion, setOccasion] = useState("Commute");
   const [items, setItems] = useState<StoredClothingItem[]>([]);
   const [outfits, setOutfits] = useState<OutfitCandidate[]>([]);
   const [message, setMessage] = useState("");
@@ -53,18 +54,19 @@ export default function OutfitsPage() {
 
     if (!response.ok) {
       setOutfits([]);
-      setMessage(`还缺少：${(data.missing ?? []).join("、")}。先补齐上衣、下装和鞋。`);
+      const missing = (data.missing ?? []).map(categoryLabel).join(", ");
+      setMessage(`Missing: ${missing}. Add a top, a bottom and shoes first.`);
       return;
     }
 
     setOutfits(data.outfits ?? []);
     setItems(data.items ?? items);
-    setMessage((data.outfits ?? []).length ? "搭好了，左右滑动看不同方案。" : "暂时没搭出方案，换个场合再试试。");
+    setMessage((data.outfits ?? []).length ? "Done — swipe to browse the looks." : "No look this time. Try another occasion.");
   }
 
   async function accept(outfitId: string) {
     setAcceptedId(outfitId);
-    setMessage("已记录这套穿搭，去享受今天吧。");
+    setMessage("Saved — enjoy your day.");
     await fetch("/api/outfits", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -105,8 +107,8 @@ export default function OutfitsPage() {
     <main className="app-page mobile-shell">
       <header className="screen-header">
         <p className="eyebrow">OOTD</p>
-        <h1>今天穿什么？</h1>
-        <p>用一句话描述场合，AI 会从你的真实衣橱里挑。</p>
+        <h1>What to wear today?</h1>
+        <p>Describe the occasion in a line — AI picks from your real wardrobe.</p>
       </header>
 
       <section className="occasion-panel">
@@ -117,9 +119,9 @@ export default function OutfitsPage() {
             </button>
           ))}
         </div>
-        <input value={occasion} onChange={(event) => setOccasion(event.target.value)} placeholder="比如：明天面试，要显得靠谱" />
+        <input value={occasion} onChange={(event) => setOccasion(event.target.value)} placeholder="e.g. interview tomorrow, want to look sharp" />
         <button className="primary-button full-width" disabled={isLoading} onClick={generate} type="button">
-          {isLoading ? loadingPhrases[phraseIdx] : "生成搭配"}
+          {isLoading ? loadingPhrases[phraseIdx] : "Generate looks"}
         </button>
         {message ? <p className="status-text">{message}</p> : null}
       </section>
@@ -127,7 +129,7 @@ export default function OutfitsPage() {
       {outfits.length ? (
         <section className="outfit-result">
           <div className="outfit-result-head">
-            <span>为「{occasion}」搭了 {outfits.length} 套</span>
+            <span>{outfits.length} looks for &ldquo;{occasion}&rdquo;</span>
             <span>{activeIdx + 1} / {outfits.length}</span>
           </div>
           <div className="outfit-carousel" ref={carouselRef} onScroll={handleCarouselScroll}>
@@ -143,14 +145,14 @@ export default function OutfitsPage() {
                   key={outfit.id}
                   onClick={() => scrollToIdx(index)}
                   type="button"
-                  aria-label={`查看方案 ${index + 1}`}
+                  aria-label={`View look ${index + 1}`}
                 />
               ))}
             </div>
           ) : null}
         </section>
       ) : items.length ? null : (
-        <EmptyState title="还没有可搭配的衣橱" copy="至少需要上衣、下装、鞋各一件，才能生成完整方案。" />
+        <EmptyState title="No wardrobe to style yet" copy="Add at least a top, a bottom and shoes to generate a full look." />
       )}
 
       <BottomNav />

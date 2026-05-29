@@ -25,16 +25,16 @@ export default function WardrobePage() {
   return (
     <main className="app-page mobile-shell">
       <header className="screen-header">
-        <p className="eyebrow">衣橱</p>
-        <h1>你的数字衣橱</h1>
-        <p>{items.length ? `已入库 ${items.length} 件衣物` : "先拍几件衣服给我看看吧。"}</p>
+        <p className="eyebrow">WARDROBE</p>
+        <h1>Your digital wardrobe</h1>
+        <p>{items.length ? `${items.length} item${items.length > 1 ? "s" : ""} in your wardrobe` : "Snap a few clothes to get started."}</p>
       </header>
 
       {items.length ? (
         <>
           <div className="filter-row">
             <button className={filter === "all" ? "chip active" : "chip"} onClick={() => setFilter("all")} type="button">
-              全部
+              All
             </button>
             {clothingCategories.map((category) => (
               <button
@@ -54,7 +54,7 @@ export default function WardrobePage() {
           </section>
         </>
       ) : (
-        <EmptyState title="衣橱还是空的" copy="上传几张真实衣物照片，AI 才能从你的衣橱里搭配。" />
+        <EmptyState title="Your wardrobe is empty" copy="Upload a few real clothing photos so AI can style from your wardrobe." />
       )}
 
       <BottomNav />

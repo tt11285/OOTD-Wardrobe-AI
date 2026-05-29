@@ -25,11 +25,11 @@ export function validateOutfitItems(itemIds: string[], knownItemIds: Set<string>
 
 export function categoryLabel(category: ClothingCategory): string {
   const labels: Record<ClothingCategory, string> = {
-    top: "上衣",
-    bottom: "下装",
-    outer: "外套",
-    shoes: "鞋",
-    accessory: "配饰",
+    top: "Top",
+    bottom: "Bottom",
+    outer: "Outerwear",
+    shoes: "Shoes",
+    accessory: "Accessory",
   };
 
   return labels[category];

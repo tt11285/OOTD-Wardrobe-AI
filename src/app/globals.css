@@ -989,3 +989,310 @@ h1 {
 
   .mobile-shell { padding: 20px 16px 110px; }
 }
+
+/* ─── Top nav (desktop only) ──────────────────────────────────────────────────── */
+.top-nav {
+  display: none;                 /* mobile-first: hidden, bottom nav rules instead */
+}
+
+.top-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  padding: 22px 24px;
+}
+
+.top-nav-brand,
+.top-nav-link {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  transition: color 0.18s ease;
+}
+
+.top-nav-brand {
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+}
+
+.top-nav-link:hover { color: var(--ink); }
+
+.top-nav-brand.active,
+.top-nav-link.active { color: var(--accent); }
+
+/* ─── Landing (two-column on desktop) ─────────────────────────────────────────── */
+.landing {
+  padding: 8px 20px 120px;
+}
+
+.landing-inner {
+  display: grid;
+  gap: 32px;
+  width: min(100%, 1180px);
+  margin: 0 auto;
+}
+
+.landing-hero {
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+  padding: 36px 28px;
+}
+
+.landing-hero h1 {
+  max-width: 16ch;
+  font-size: clamp(34px, 8vw, 56px);
+  font-weight: 500;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.landing-hero .hero-copy {
+  margin: 20px 0 0;
+  max-width: 42ch;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.landing-hero .hero-actions { margin-top: 28px; }
+
+/* ─── Phone mockups ───────────────────────────────────────────────────────────── */
+.landing-phones {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 8px 4px 28px;
+  scrollbar-width: none;
+}
+
+.landing-phones::-webkit-scrollbar { display: none; }
+
+.phone {
+  position: relative;
+  flex: 0 0 auto;
+  width: 188px;
+  aspect-ratio: 188 / 392;
+  padding: 7px;
+  border-radius: 32px;
+  background: #1c1916;
+  box-shadow: var(--shadow-lg);
+  -webkit-box-reflect: below 8px linear-gradient(transparent 62%, rgba(28, 25, 22, 0.10));
+}
+
+.phone-notch {
+  position: absolute;
+  top: 11px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  width: 58px;
+  height: 15px;
+  border-radius: 999px;
+  background: #1c1916;
+}
+
+.phone-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+  height: 100%;
+  padding: 10px 11px 12px;
+  border-radius: 26px;
+  background: var(--background);
+  overflow: hidden;
+}
+
+.phone-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1px 4px 0;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.phone-status-icons {
+  width: 22px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--muted-light);
+  opacity: 0.5;
+}
+
+.phone-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 0 6px;
+  border-bottom: 1px solid var(--line);
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--muted-light);
+}
+
+.phone-nav-brand { color: var(--accent); letter-spacing: 0.08em; }
+.phone-nav-link.active { color: var(--ink); }
+
+.phone-eyebrow {
+  margin: 3px 0 0;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+}
+
+.phone-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.phone-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 4px;
+  min-height: 44px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.phone-upload-icon { font-size: 11px; }
+
+.phone-badges { display: flex; gap: 4px; }
+
+.phone-badge {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--success-bg);
+  color: var(--success-text);
+  font-size: 6.5px;
+  font-weight: 700;
+}
+
+.phone-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+
+.phone-chip {
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 7px;
+  font-weight: 600;
+}
+
+.phone-chip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+.phone-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.phone-grid span { aspect-ratio: 1; border-radius: 7px; }
+
+.phone-outfit {
+  margin-top: 2px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.phone-outfit-collage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: #ede8e2;
+}
+
+.phone-outfit-collage span {
+  position: relative;
+  aspect-ratio: 1.5;
+}
+
+.phone-outfit-collage i {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  padding: 1px 4px;
+  border-radius: 999px;
+  background: rgba(28, 25, 22, 0.7);
+  color: #fff;
+  font-style: normal;
+  font-size: 5.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.phone-outfit-style {
+  margin: 6px 8px 0;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.phone-outfit-reason {
+  margin: 3px 8px 0;
+  font-size: 8px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.phone-outfit-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 7px 8px 8px;
+  min-height: 24px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 600;
+}
+
+/* ─── Desktop: top nav on, bottom nav off, landing goes two-column ─────────────── */
+@media (min-width: 900px) {
+  .top-nav { display: block; }
+  .bottom-nav { display: none; }
+
+  .landing { padding: 0 24px 40px; }
+
+  .landing-inner {
+    grid-template-columns: minmax(300px, 1fr) 1.35fr;
+    align-items: center;
+    gap: 40px;
+    min-height: calc(100dvh - 160px);
+  }
+
+  .landing-hero { padding: 48px 40px; }
+
+  .landing-phones {
+    justify-content: center;
+    overflow: visible;
+  }
+}

@@ -5,16 +5,16 @@ import { usePathname } from "next/navigation";
 import { Camera, Grid2X2, Sparkles } from "lucide-react";
 
 const links = [
-  { href: "/upload",   label: "建库",  icon: Camera   },
-  { href: "/wardrobe", label: "衣橱",  icon: Grid2X2  },
-  { href: "/outfits",  label: "搭配",  icon: Sparkles },
+  { href: "/upload",   label: "ADD",       icon: Camera   },
+  { href: "/wardrobe", label: "WARDROBE",  icon: Grid2X2  },
+  { href: "/outfits",  label: "OUTFITS",   icon: Sparkles },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="bottom-nav" aria-label="主导航">
+    <nav className="bottom-nav" aria-label="Primary">
       {links.map(({ href, label, icon: Icon }) => {
         const active = pathname === href;
         return (

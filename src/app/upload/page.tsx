@@ -55,14 +55,14 @@ async function detectRealFormat(file: File): Promise<ImageFormat> {
 async function validateImageFormat(file: File): Promise<string | null> {
   const fmt = await detectRealFormat(file);
   if (fmt === "heic") {
-    return `「${file.name}」是 HEIC/HEIF 格式（iPhone 默认格式）。\n请在手机「设置 → 相机 → 格式 → 兼容性最强」改为 JPEG，或在照片 App 长按 → 分享 → 存储为 JPEG。`;
+    return `"${file.name}" is HEIC/HEIF (iPhone's default format).\nSwitch your camera to JPEG via Settings → Camera → Formats → Most Compatible, or in Photos: long-press → Share → Save as JPEG.`;
   }
   if (fmt === "unknown") {
     // Unknown magic bytes — might still be something Claude can't handle.
     // Check the declared type/extension as a secondary signal.
     const suspicious = /heic|heif|tiff?|bmp|ico|avif|jxl/i;
     if (suspicious.test(file.type) || suspicious.test(file.name)) {
-      return `「${file.name}」格式不受支持（${file.type || "未知格式"}）。请上传 JPG、PNG 或 WebP 格式的图片。`;
+      return `"${file.name}" is an unsupported format (${file.type || "unknown"}). Please upload a JPG, PNG or WebP image.`;
     }
   }
   return null; // format is OK
@@ -89,8 +89,8 @@ async function compressImage(file: File): Promise<string> {
       if (!naturalWidth || !naturalHeight || naturalWidth <= 1 || naturalHeight <= 1) {
         reject(
           new Error(
-            `「${file.name}」无法被浏览器解码（宽高 ≤1px）。` +
-            "请确认图片是 JPG / PNG / WebP 格式，HEIC 需先转换为 JPEG 再上传。",
+            `"${file.name}" could not be decoded by the browser (size ≤1px). ` +
+            "Make sure it's a JPG / PNG / WebP image — HEIC must be converted to JPEG first.",
           ),
         );
         return;
@@ -115,7 +115,7 @@ async function compressImage(file: File): Promise<string> {
       const ctx = canvas.getContext("2d");
 
       if (!ctx) {
-        reject(new Error(`无法创建 Canvas（${file.name}）`));
+        reject(new Error(`Could not create canvas (${file.name})`));
         return;
       }
 
@@ -126,7 +126,7 @@ async function compressImage(file: File): Promise<string> {
       if (base64Part.length < MIN_VALID_BASE64_CHARS) {
         reject(
           new Error(
-            `「${file.name}」压缩后图像数据过小，可能格式有问题。请重新导出为标准 JPEG 后再试。`,
+            `"${file.name}" produced too little image data after compression — the format may be broken. Re-export as a standard JPEG and try again.`,
           ),
         );
         return;
@@ -139,8 +139,8 @@ async function compressImage(file: File): Promise<string> {
       URL.revokeObjectURL(objectUrl);
       reject(
         new Error(
-          `「${file.name}」加载失败。请确认是 JPG / PNG / WebP 格式，` +
-          "HEIC 图片请先在手机「照片 App → 分享 → 存储为 JPEG」后再上传。",
+          `"${file.name}" failed to load. Make sure it's a JPG / PNG / WebP image — ` +
+          "for HEIC, first export it as JPEG via Photos → Share → Save as JPEG.",
         ),
       );
     };
@@ -176,14 +176,14 @@ export default function UploadPage() {
     }
     if (formatErrors.length) {
       setPhase("error");
-      setMessage("❌ 部分图片格式不支持：\n" + formatErrors.join("\n"));
+      setMessage("❌ Some images aren't supported:\n" + formatErrors.join("\n"));
       return;
     }
 
     setResults([]);
     setIsLoading(true);
     setPhase("compressing");
-    setMessage(`正在压缩 ${selected.length} 张图片…`);
+    setMessage(`Compressing ${selected.length} image${selected.length > 1 ? "s" : ""}…`);
 
     let compressed: string[];
     try {
@@ -191,14 +191,14 @@ export default function UploadPage() {
     } catch (err) {
       setIsLoading(false);
       setPhase("error");
-      setMessage(err instanceof Error ? `❌ ${err.message}` : "图片处理失败，请重试");
+      setMessage(err instanceof Error ? `❌ ${err.message}` : "Image processing failed, please retry");
       return;
     }
 
     // Show previews immediately after compression
     setPreviews(compressed);
     setPhase("recognizing");
-    setMessage("AI 抠图 + 识别中，约 10-20 秒…");
+    setMessage("AI cutout + recognition, about 10–20s…");
 
     let data: {
       results?: RecognitionResult[];
@@ -217,13 +217,13 @@ export default function UploadPage() {
       if (!response.ok) {
         setIsLoading(false);
         setPhase("error");
-        setMessage(`识别失败：${data.error ?? "请检查模型 API 配置"}`);
+        setMessage(`Recognition failed: ${data.error ?? "check the model API config"}`);
         return;
       }
     } catch {
       setIsLoading(false);
       setPhase("error");
-      setMessage("网络错误，请检查连接后重试");
+      setMessage("Network error — check your connection and retry");
       return;
     }
 
@@ -257,13 +257,13 @@ export default function UploadPage() {
     setPhase("done");
     setMessage(
       [
-        autoCount ? `✅ ${autoCount} 件已自动入库` : null,
-        reviewCount ? `🔍 ${reviewCount} 件需要确认` : null,
-        failedCount ? `❌ ${failedCount} 件识别失败` : null,
-        processedCount ? `🪄 ${processedCount} 张已抠图` : null,
+        autoCount ? `✅ ${autoCount} auto-added` : null,
+        reviewCount ? `🔍 ${reviewCount} to confirm` : null,
+        failedCount ? `❌ ${failedCount} failed` : null,
+        processedCount ? `🪄 ${processedCount} cut out` : null,
       ]
         .filter(Boolean)
-        .join("　") || "识别完成",
+        .join("　") || "Recognition complete",
     );
   }
 
@@ -284,9 +284,9 @@ export default function UploadPage() {
   return (
     <main className="app-page mobile-shell">
       <header className="screen-header">
-        <p className="eyebrow">建库</p>
-        <h1>拍几张衣服，先让 AI 认识你的衣橱。</h1>
-        <p>每批最多 10 张，每张可以有多件衣服。建议 10 分钟内完成 30-100 件的首次建库。</p>
+        <p className="eyebrow">ADD</p>
+        <h1>Snap your clothes — let AI learn your wardrobe.</h1>
+        <p>Up to 10 photos per batch, multiple pieces per photo. Aim to add 30–100 items in your first 10 minutes.</p>
       </header>
 
       {/* ── Upload zone ─────────────────────────────── */}
@@ -303,10 +303,10 @@ export default function UploadPage() {
           {isLoading ? (
             <>
               <span className="upload-spinner" aria-hidden="true" />
-              {phase === "compressing" ? "处理中…" : "AI 扫描识别中…"}
+              {phase === "compressing" ? "Processing…" : "AI scanning…"}
             </>
           ) : previews.length ? (
-            "继续上传更多衣服"
+            "Add more clothes"
           ) : (
             <>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -314,7 +314,7 @@ export default function UploadPage() {
                 <polyline points="17 8 12 3 7 8" />
                 <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
-              选择 1-10 张衣物照片
+              Select 1–10 clothing photos
             </>
           )}
         </label>
@@ -325,7 +325,7 @@ export default function UploadPage() {
           <span className="format-badge">✓ PNG</span>
           <span className="format-badge">✓ WebP</span>
           <span className="format-badge format-badge--no">✗ HEIC</span>
-          <span className="format-hint-note">iPhone 请先转 JPEG：设置 → 相机 → 格式 → 兼容性最强</span>
+          <span className="format-hint-note">iPhone: switch to JPEG first — Settings → Camera → Formats → Most Compatible</span>
         </div>
       </section>
 
@@ -338,9 +338,9 @@ export default function UploadPage() {
 
       {/* ── Preview grid ────────────────────────────── */}
       {previews.length ? (
-        <section className="preview-grid" aria-label="上传预览">
+        <section className="preview-grid" aria-label="Upload previews">
           {previews.map((src, i) => (
-            <img alt={`衣物照片 ${i + 1}`} key={i} src={src} />
+            <img alt={`Clothing photo ${i + 1}`} key={i} src={src} />
           ))}
         </section>
       ) : null}
@@ -348,7 +348,7 @@ export default function UploadPage() {
       {/* ── Review sections ─────────────────────────── */}
       {needsReview.length ? (
         <section className="review-section">
-          <h2 className="section-title warning-title">🔍 需要你确认 ({needsReview.length})</h2>
+          <h2 className="section-title warning-title">🔍 Needs your confirmation ({needsReview.length})</h2>
           <div className="review-list">
             {needsReview.map((result) => (
               <ReviewCard key={result.item.id} result={result} onSave={saveReviewed} />
@@ -359,7 +359,7 @@ export default function UploadPage() {
 
       {autoAccepted.length ? (
         <section className="review-section">
-          <h2 className="section-title success-title">✅ 已自动入库 ({autoAccepted.length})</h2>
+          <h2 className="section-title success-title">✅ Auto-added ({autoAccepted.length})</h2>
           <div className="review-list">
             {autoAccepted.map((result) => (
               <ReviewCard key={result.item.id} result={result} onSave={saveReviewed} />
@@ -370,7 +370,7 @@ export default function UploadPage() {
 
       {failed.length ? (
         <section className="review-section">
-          <h2 className="section-title failed-title">❌ 识别失败，建议重拍 ({failed.length})</h2>
+          <h2 className="section-title failed-title">❌ Failed — retake suggested ({failed.length})</h2>
           <div className="review-list">
             {failed.map((result) => (
               <ReviewCard key={result.item.id} result={result} onSave={saveReviewed} />
@@ -402,7 +402,7 @@ function ReviewCard({
         {item.imageUrl ? (
           <img alt={item.name} src={item.imageUrl} />
         ) : (
-          <div className="review-card-no-image">无图</div>
+          <div className="review-card-no-image">No image</div>
         )}
       </div>
       <div className="review-fields">
@@ -411,17 +411,17 @@ function ReviewCard({
             auto ? "status-badge success" : failed ? "status-badge failed-badge" : "status-badge warning"
           }
         >
-          {auto ? "已自动入库" : failed ? "识别失败" : "待你确认"}
+          {auto ? "Auto-added" : failed ? "Failed" : "To confirm"}
         </span>
         {!failed && (
           <>
             <input
-              aria-label="名称"
+              aria-label="Name"
               value={item.name}
               onChange={(e) => setItem({ ...item, name: e.target.value })}
             />
             <select
-              aria-label="品类"
+              aria-label="Category"
               value={item.category}
               onChange={(e) => setItem({ ...item, category: e.target.value as ClothingCategory })}
             >
@@ -432,19 +432,19 @@ function ReviewCard({
               ))}
             </select>
             <input
-              aria-label="颜色（用逗号分隔）"
-              value={item.colors.join("、")}
+              aria-label="Colors (comma separated)"
+              value={item.colors.join(", ")}
               onChange={(e) => setItem({ ...item, colors: splitTags(e.target.value) })}
             />
             {!auto ? (
               <button className="primary-button" onClick={() => onSave(item)} type="button">
-                确认入库
+                Add to wardrobe
               </button>
             ) : null}
           </>
         )}
         {failed && (
-          <p className="failed-hint">光线不足或遮挡较多，建议重新拍摄后再上传。</p>
+          <p className="failed-hint">Too dark or too occluded — retake the photo and upload again.</p>
         )}
       </div>
     </article>

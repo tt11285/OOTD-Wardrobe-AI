@@ -4,7 +4,7 @@ import { categoryLabel } from "@/lib/domain/outfits";
 // A pale icon placeholder shown when no real image is available yet
 function NoImagePlaceholder({ name }: { name: string }) {
   return (
-    <div className="item-no-image" aria-label={`${name} — 暂无图片`}>
+    <div className="item-no-image" aria-label={`${name} — no image`}>
       <svg
         width="32"
         height="32"
@@ -18,7 +18,7 @@ function NoImagePlaceholder({ name }: { name: string }) {
         <circle cx="8.5" cy="8.5" r="1.5" />
         <polyline points="21 15 16 10 5 21" />
       </svg>
-      <span>暂无图片</span>
+      <span>No image</span>
     </div>
   );
 }
@@ -49,7 +49,7 @@ export function ItemCard({ item }: { item: StoredClothingItem }) {
         <div>
           <p className="item-name">{item.name}</p>
           <p className="item-meta">
-            {categoryLabel(item.category)} · 正式度 {item.formality}
+            {categoryLabel(item.category)} · Formality {item.formality}
           </p>
         </div>
         <div className="tag-row">

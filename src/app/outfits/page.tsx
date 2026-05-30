@@ -104,10 +104,12 @@ export default function OutfitsPage() {
     });
   }
 
-  // The lowest-rank outfit is the AI's single strongest recommendation.
-  const recommendedId = outfits.length
-    ? [...outfits].sort((a, b) => a.rank - b.rank)[0].id
-    : null;
+  // Top pick = the strongest WEARABLE (wardrobe) look — never an aspirational one.
+  const recommendedId = (() => {
+    const pool = outfits.filter((o) => o.kind !== "aspirational");
+    const list = pool.length ? pool : outfits;
+    return list.length ? [...list].sort((a, b) => a.rank - b.rank)[0].id : null;
+  })();
 
   return (
     <main className="app-page mobile-shell">

@@ -16,10 +16,14 @@ export async function POST(request: NextRequest) {
   }
 
   const outfits = await generateOutfits(items, occasion);
-  const saved = await repository.saveOutfits(outfits);
-  await repository.trackEvent(userId, "outfit_generated", { occasion, count: saved.length });
 
-  return NextResponse.json({ outfits: saved, items });
+  // Persist only wearable wardrobe looks (so they can be accepted). Aspirational
+  // looks are view-only inspiration and are returned transiently, not stored.
+  const wardrobe = outfits.filter((o) => o.kind !== "aspirational");
+  await repository.saveOutfits(wardrobe);
+  await repository.trackEvent(userId, "outfit_generated", { occasion, count: outfits.length });
+
+  return NextResponse.json({ outfits, items });
 }
 
 export async function PATCH(request: NextRequest) {

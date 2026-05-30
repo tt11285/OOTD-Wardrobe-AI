@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { OutfitCandidate, StoredClothingItem } from "@/lib/storage/repository";
+import type { OutfitCandidate, OutfitPiece, StoredClothingItem } from "@/lib/storage/repository";
 import { categoryLabel } from "@/lib/domain/outfits";
 
-function hasRealImage(url: string): boolean {
+function hasRealImage(url: string | undefined): boolean {
   if (!url) return false;
   if (url.startsWith("http")) return true;
   if (url.startsWith("data:")) {
@@ -13,6 +13,8 @@ function hasRealImage(url: string): boolean {
   }
   return false;
 }
+
+type RenderPiece = OutfitPiece & { imageUrl?: string };
 
 export function OutfitCard({
   outfit,
@@ -28,24 +30,38 @@ export function OutfitCard({
   recommended?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const aspirational = outfit.kind === "aspirational";
 
-  const selected = outfit.selectedItems
-    .map((id) => items.find((item) => item.id === id))
-    .filter((item): item is StoredClothingItem => Boolean(item));
+  // Prefer the structured pieces; fall back to selectedItems for persisted
+  // outfits (loaded from the DB) that predate the pieces field.
+  const basePieces: OutfitPiece[] = outfit.pieces?.length
+    ? outfit.pieces
+    : outfit.selectedItems
+        .map((id) => items.find((it) => it.id === id))
+        .filter((it): it is StoredClothingItem => Boolean(it))
+        .map((it) => ({ itemId: it.id, name: it.name, category: it.category, colors: it.colors, owned: true }));
+
+  const pieces: RenderPiece[] = basePieces.map((p) => {
+    const real = p.itemId ? items.find((it) => it.id === p.itemId) : undefined;
+    return { ...p, imageUrl: real?.imageUrl };
+  });
 
   return (
-    <article className={`outfit-card${accepted ? " is-accepted" : ""}${recommended ? " is-recommended" : ""}`}>
-      <div className="outfit-collage" data-count={selected.length}>
-        {selected.map((item) => (
-          <div className="outfit-tile" key={item.id}>
-            {hasRealImage(item.imageUrl) ? (
-              <img alt={item.name} src={item.imageUrl} />
+    <article
+      className={`outfit-card${accepted ? " is-accepted" : ""}${recommended ? " is-recommended" : ""}${aspirational ? " is-aspirational" : ""}`}
+    >
+      <div className="outfit-collage" data-count={pieces.length}>
+        {pieces.map((piece, i) => (
+          <div className={`outfit-tile${piece.owned ? "" : " outfit-tile--suggested"}`} key={piece.itemId ?? `${piece.name}-${i}`}>
+            {piece.owned && hasRealImage(piece.imageUrl) ? (
+              <img alt={piece.name} src={piece.imageUrl} />
             ) : (
               <div className="outfit-tile-fallback">
-                <small>{item.name}</small>
+                {!piece.owned ? <span className="suggested-tag">Suggested</span> : null}
+                <small>{piece.name}</small>
               </div>
             )}
-            <span className="outfit-tile-label">{categoryLabel(item.category)}</span>
+            <span className="outfit-tile-label">{categoryLabel(piece.category)}</span>
           </div>
         ))}
       </div>
@@ -54,6 +70,7 @@ export function OutfitCard({
         <div className="outfit-head">
           <p className="outfit-style">{outfit.style}</p>
           <div className="outfit-badges">
+            {aspirational ? <span className="status-badge aspirational-badge">Styling goal</span> : null}
             {recommended ? <span className="status-badge recommended">★ Top pick</span> : null}
             {accepted ? <span className="status-badge success">Today&apos;s pick</span> : null}
           </div>
@@ -62,20 +79,18 @@ export function OutfitCard({
         <h2>{outfit.reason}</h2>
 
         <ul className="outfit-items">
-          {selected.map((item) => (
-            <li key={item.id}>
-              <span className="outfit-item-cat">{categoryLabel(item.category)}</span>
-              <span className="outfit-item-name">{item.name}</span>
+          {pieces.map((piece, i) => (
+            <li key={piece.itemId ?? `${piece.name}-${i}`}>
+              <span className="outfit-item-cat">{categoryLabel(piece.category)}</span>
+              <span className="outfit-item-name">
+                {piece.name}
+                {!piece.owned ? <em className="suggested-inline"> · suggested</em> : null}
+              </span>
             </li>
           ))}
         </ul>
 
-        <button
-          className="outfit-why"
-          type="button"
-          aria-expanded={expanded}
-          onClick={() => setExpanded((value) => !value)}
-        >
+        <button className="outfit-why" type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)}>
           Why this look
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
             <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
@@ -90,19 +105,21 @@ export function OutfitCard({
             </p>
             <p>
               <strong>Style</strong>
-              {outfit.style} · formality matched to the occasion, every piece from your own wardrobe.
+              {outfit.style}
+              {aspirational
+                ? " · an aspirational look — some pieces aren't in your wardrobe yet."
+                : " · formality matched to the occasion, every piece from your own wardrobe."}
             </p>
           </div>
         ) : null}
 
-        <button
-          className="primary-button full-width"
-          onClick={() => onAccept(outfit.id)}
-          type="button"
-          disabled={accepted}
-        >
-          {accepted ? "✓ Selected" : "Wear this today"}
-        </button>
+        {aspirational ? (
+          <p className="aspirational-note">Inspiration only — pieces marked “Suggested” aren’t in your wardrobe yet.</p>
+        ) : (
+          <button className="primary-button full-width" onClick={() => onAccept(outfit.id)} type="button" disabled={accepted}>
+            {accepted ? "✓ Selected" : "Wear this today"}
+          </button>
+        )}
       </div>
     </article>
   );

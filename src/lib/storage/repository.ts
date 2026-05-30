@@ -33,6 +33,17 @@ export type RecognitionRecord = {
   createdAt: string;
 };
 
+// A piece inside an outfit. Owned pieces map to a real wardrobe item (itemId +
+// image); suggested pieces (aspirational looks) are described garments the user
+// doesn't own yet.
+export type OutfitPiece = {
+  itemId: string | null;
+  name: string;
+  category: ClothingCategory;
+  colors: string[];
+  owned: boolean;
+};
+
 export type OutfitCandidate = {
   id: string;
   userId: string;
@@ -45,6 +56,10 @@ export type OutfitCandidate = {
   rank: number;
   modelUsed: string;
   createdAt: string;
+  // Transport/render-only (not persisted): "wardrobe" looks are fully wearable
+  // from the user's closet; "aspirational" looks may include suggested pieces.
+  kind?: "wardrobe" | "aspirational";
+  pieces?: OutfitPiece[];
 };
 
 type ItemPatch = Partial<

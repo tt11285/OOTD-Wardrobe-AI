@@ -939,6 +939,45 @@ h1 {
   box-shadow: 0 0 0 2px var(--accent), var(--shadow);
 }
 
+/* ── Aspirational looks (view-only inspiration) ── */
+.status-badge.aspirational-badge {
+  background: var(--accent-subtle);
+  color: var(--accent-strong);
+  white-space: nowrap;
+}
+
+.outfit-tile--suggested .outfit-tile-fallback {
+  flex-direction: column;
+  gap: 5px;
+  background: #f1ece6;
+  border: 1px dashed var(--muted-light);
+  color: var(--muted);
+}
+
+.suggested-tag {
+  padding: 1px 7px;
+  border-radius: var(--r-full);
+  background: var(--accent);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.suggested-inline {
+  font-style: normal;
+  color: var(--accent);
+  font-size: 11px;
+}
+
+.aspirational-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
 /* ── Pagination dots ── */
 .outfit-dots {
   display: flex;

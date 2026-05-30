@@ -1,7 +1,7 @@
 import { confidenceTier, normalizeRecognitionItem } from "@/lib/domain/recognition";
 import { getWardrobeReadiness } from "@/lib/domain/outfits";
 import { recognizeWithOfoxAnthropic, recommendOutfitsWithOfoxAnthropic } from "@/lib/ai/ofox-anthropic";
-import type { RecognitionRecord, StoredClothingItem, OutfitCandidate } from "@/lib/storage/repository";
+import type { RecognitionRecord, StoredClothingItem, OutfitCandidate, OutfitPiece } from "@/lib/storage/repository";
 import { createDemoItem, createId, nowIso } from "@/lib/storage/repository";
 
 export type RecognitionResponse = {
@@ -111,15 +111,23 @@ export async function generateDemoOutfits(items: StoredClothingItem[], occasion:
   const modelUsed = modelConfig().recommendationModel;
   const timestamp = nowIso();
 
+  const toPieces = (list: StoredClothingItem[]): OutfitPiece[] =>
+    list.map((it) => ({ itemId: it.id, name: it.name, category: it.category, colors: it.colors, owned: true }));
+
+  const look1 = [...base, ...(outer ? [outer] : [])];
+  const look2 = [...base, ...(accessory ? [accessory] : [])];
+
   return [
     {
       id: createId(),
       userId: items[0]?.userId ?? "demo",
       occasion,
-      selectedItems: [...base, ...(outer ? [outer] : [])].map((item) => item.id),
-      reason: "The shirt and straight trousers set a sharp tone, while the loafers keep the formality from feeling stiff — an easy way to look professional fast.",
+      kind: "wardrobe",
+      pieces: toPieces(look1),
+      selectedItems: look1.map((item) => item.id),
+      reason: "A clean, sharp foundation from your wardrobe — straight trousers and a crisp top, grounded by polished shoes.",
       style: "Urban commute",
-      colorLogic: "Off-white, black and brown form a steady three-color palette — clean but not flat.",
+      colorLogic: "A steady three-color neutral palette — clean but not flat.",
       userAction: "pending",
       rank: 1,
       modelUsed,
@@ -129,7 +137,9 @@ export async function generateDemoOutfits(items: StoredClothingItem[], occasion:
       id: createId(),
       userId: items[0]?.userId ?? "demo",
       occasion,
-      selectedItems: [...base, ...(accessory ? [accessory] : [])].map((item) => item.id),
+      kind: "wardrobe",
+      pieces: toPieces(look2),
+      selectedItems: look2.map((item) => item.id),
       reason: "Keeps a clean silhouette and adds a simple accessory for polish — looks considered without any morning effort.",
       style: "French minimal",
       colorLogic: "Low-saturation neutrals kept within three colors, with a clear visual focus.",
@@ -147,9 +157,13 @@ export async function generateOutfits(items: StoredClothingItem[], occasion: str
     try {
       const userId = items[0]?.userId ?? "server-demo-user";
       const realOutfits = await recommendOutfitsWithOfoxAnthropic(items, occasion, userId);
-      // If AI returned at least one valid outfit, use it
       if (realOutfits.length > 0) {
-        return realOutfits;
+        // Guarantee at least one fully-wearable wardrobe look. If the AI only
+        // produced aspirational looks, prepend a deterministic wardrobe outfit.
+        const hasWardrobe = realOutfits.some((o) => o.kind !== "aspirational" && o.selectedItems.length >= 2);
+        if (hasWardrobe) return realOutfits;
+        const demo = await generateDemoOutfits(items, occasion);
+        return [...demo.slice(0, 1), ...realOutfits].slice(0, 3);
       }
       // Otherwise fall through to deterministic fallback so the demo never breaks
       console.warn("[outfit] AI returned 0 valid outfits, falling back to demo");

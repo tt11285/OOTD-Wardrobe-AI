@@ -1,8 +1,9 @@
 import { confidenceTier, normalizeRecognitionItem } from "@/lib/domain/recognition";
+import { isClothingCategory, normalizeStringList } from "@/lib/domain/clothing";
 import { occasionHint } from "@/lib/domain/occasion";
 import { stylePromptContext } from "@/lib/style/style-rules";
 import { retrieveStyleReferences, formatReferencesForPrompt } from "@/lib/style/retrieve";
-import { createDemoItem, createId, nowIso, type OutfitCandidate, type RecognitionRecord, type StoredClothingItem } from "@/lib/storage/repository";
+import { createDemoItem, createId, nowIso, type OutfitCandidate, type OutfitPiece, type RecognitionRecord, type StoredClothingItem } from "@/lib/storage/repository";
 
 type AnthropicTextBlock = {
   type: "text";
@@ -224,7 +225,17 @@ function recognitionInstruction(): string {
 
 // ─── Outfit generation via Claude ────────────────────────────────────────────
 
+type RawPiece = {
+  id?: unknown;
+  name?: unknown;
+  category?: unknown;
+  colors?: unknown;
+  owned?: unknown;
+};
+
 type RawOutfit = {
+  kind?: unknown;
+  pieces?: unknown[];
   selected_items?: unknown[];
   selectedItems?: unknown[];
   reason?: unknown;
@@ -274,20 +285,24 @@ export async function recommendOutfitsWithOfoxAnthropic(
       ? ["", "[Reference cases recalled from the aesthetic knowledge base — for inspiration only, do not copy verbatim]", referencesBlock]
       : []),
     "",
-    "Here is the user's REAL wardrobe (only reference these ids, do not invent any):",
+    "Here is the user's REAL wardrobe (each piece has an id):",
     JSON.stringify(wardrobeSummary, null, 2),
     "",
     `Occasion: ${occasion}`,
     "",
-    "Generate 2-3 outfits. Output STRICT JSON (no Markdown, no explanation), format:",
-    '{"outfits":[{"selected_items":["id1","id2","id3"],"style":"French minimal","reason":"why this works, 2-3 sentences","color_logic":"color pairing rationale, 1-2 sentences"}]}',
+    "Build outfits as follows:",
+    "1. ALWAYS include at least one outfit (the FIRST) that uses ONLY the user's real wardrobe — the best achievable look for this occasion, even if it isn't perfectly formal. Mark it \"kind\":\"wardrobe\".",
+    "2. Then judge whether the wardrobe can truly meet the occasion. If it CAN, add 1-2 more strong looks from the wardrobe (\"kind\":\"wardrobe\"). If it CANNOT (e.g. no formal-enough pieces), add 1-2 aspirational looks (\"kind\":\"aspirational\") at the ideal formality — you may include pieces the user does NOT own.",
+    "Return 2-3 outfits total. Output STRICT JSON (no Markdown, no explanation), format:",
+    '{"outfits":[{"kind":"wardrobe","style":"French minimal","reason":"why this works, 2-3 sentences","color_logic":"1-2 sentences","pieces":[{"id":"<wardrobe id>","name":"White cotton shirt","category":"top","colors":["white"],"owned":true}]}]}',
     "",
-    "Hard rules:",
-    "- Each outfit includes at least 1 top, 1 bottom and 1 pair of shoes; outer and accessory optional.",
-    "- No more than 3 main colors.",
+    "Piece rules:",
+    "- An OWNED piece has \"owned\":true and its real wardrobe \"id\". A SUGGESTED piece (only in aspirational looks) has \"owned\":false and NO id.",
+    "- A \"wardrobe\" outfit must contain ONLY owned pieces (real ids).",
+    "- Each outfit has at least 1 top, 1 bottom and 1 pair of shoes; outer/accessory optional. No more than 3 main colors.",
     `- Keep formality close to ${hint.formality} (1=very casual, 5=very formal).`,
-    "- Order the outfits best-first: the FIRST outfit must be your single strongest recommendation for this occasion.",
-    "- Write everything (style, reason, color_logic) in ENGLISH, in a warm professional stylist voice — not bullet points.",
+    "- Order best-first: the first outfit is your single strongest recommendation.",
+    "- Write everything (style, reason, color_logic, piece names) in ENGLISH, warm professional stylist voice.",
   ].join("\n");
 
   const response = await fetch(url, {
@@ -320,36 +335,63 @@ export async function recommendOutfitsWithOfoxAnthropic(
 
   const parsed = extractJsonObject(text) as { outfits?: RawOutfit[] };
   const rawOutfits = Array.isArray(parsed.outfits) ? parsed.outfits : [];
-  const knownIds = new Set(items.map((it) => it.id));
+  const itemsById = new Map(items.map((it) => [it.id, it]));
   const modelLabel = model;
   const timestamp = nowIso();
 
   const candidates: OutfitCandidate[] = [];
 
   rawOutfits.forEach((raw, index) => {
-    const rawSelectedRaw = Array.isArray(raw.selected_items)
-      ? raw.selected_items
-      : Array.isArray(raw.selectedItems)
-        ? raw.selectedItems
-        : [];
-    const selected = rawSelectedRaw.map(String).filter((id) => knownIds.has(id));
+    const kind: "wardrobe" | "aspirational" = raw.kind === "aspirational" ? "aspirational" : "wardrobe";
 
-    // Drop outfits that reference unknown / hallucinated IDs
-    if (selected.length < 2) return;
+    // Build the pieces list — prefer the structured `pieces`, fall back to the
+    // legacy selected_items (all owned).
+    let pieces: OutfitPiece[] = [];
+    if (Array.isArray(raw.pieces) && raw.pieces.length) {
+      pieces = (raw.pieces as RawPiece[]).map((p) => {
+        const id = typeof p.id === "string" && itemsById.has(p.id) ? p.id : null;
+        const owned = id !== null && p.owned !== false;
+        const real = id ? itemsById.get(id)! : null;
+        return {
+          itemId: owned ? id : null,
+          name: real?.name ?? (typeof p.name === "string" ? p.name : "Item"),
+          category: isClothingCategory(p.category) ? p.category : (real?.category ?? "accessory"),
+          colors: real?.colors ?? normalizeStringList(p.colors),
+          owned,
+        } satisfies OutfitPiece;
+      });
+    } else {
+      const ids = (Array.isArray(raw.selected_items) ? raw.selected_items : Array.isArray(raw.selectedItems) ? raw.selectedItems : [])
+        .map(String)
+        .filter((id) => itemsById.has(id));
+      pieces = ids.map((id) => {
+        const real = itemsById.get(id)!;
+        return { itemId: id, name: real.name, category: real.category, colors: real.colors, owned: true } satisfies OutfitPiece;
+      });
+    }
+
+    const ownedIds = pieces.filter((p) => p.owned && p.itemId).map((p) => p.itemId as string);
+
+    // A wardrobe look must be wearable from the closet (>= 2 owned pieces).
+    // An aspirational look just needs some pieces (owned or suggested).
+    if (kind === "wardrobe" && ownedIds.length < 2) return;
+    if (pieces.length < 2) return;
 
     candidates.push({
       id: createId(),
       userId,
       occasion,
-      selectedItems: selected,
-      reason: typeof raw.reason === "string" && raw.reason.trim() ? raw.reason.trim() : "AI 推荐的搭配方案。",
+      kind,
+      pieces,
+      selectedItems: ownedIds,
+      reason: typeof raw.reason === "string" && raw.reason.trim() ? raw.reason.trim() : "A look picked for the occasion.",
       style: typeof raw.style === "string" && raw.style.trim() ? raw.style.trim() : hint.style,
       colorLogic:
         typeof raw.color_logic === "string" && raw.color_logic.trim()
           ? raw.color_logic.trim()
           : typeof raw.colorLogic === "string"
             ? raw.colorLogic.trim()
-            : "三色以内，重心清楚。",
+            : "Kept within three colors with a clear focus.",
       userAction: "pending",
       rank: index + 1,
       modelUsed: modelLabel,

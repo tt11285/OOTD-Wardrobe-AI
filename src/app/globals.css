@@ -916,7 +916,25 @@ h1 {
   to   { opacity: 1; transform: none; }
 }
 
-/* ── Accepted state ── */
+/* ── Badges in the outfit head ── */
+.outfit-badges {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.status-badge.recommended {
+  background: var(--accent);
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* ── Recommended (AI top pick) — soft accent ring ── */
+.outfit-card.is-recommended {
+  box-shadow: 0 0 0 1.5px var(--accent), var(--shadow-sm);
+}
+
+/* ── Accepted state (stronger ring, wins over recommended) ── */
 .outfit-card.is-accepted {
   box-shadow: 0 0 0 2px var(--accent), var(--shadow);
 }

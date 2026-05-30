@@ -104,6 +104,11 @@ export default function OutfitsPage() {
     });
   }
 
+  // The lowest-rank outfit is the AI's single strongest recommendation.
+  const recommendedId = outfits.length
+    ? [...outfits].sort((a, b) => a.rank - b.rank)[0].id
+    : null;
+
   return (
     <main className="app-page mobile-shell">
       <header className="screen-header">
@@ -135,7 +140,14 @@ export default function OutfitsPage() {
           </div>
           <div className="outfit-carousel" ref={carouselRef} onScroll={handleCarouselScroll}>
             {outfits.map((outfit) => (
-              <OutfitCard outfit={outfit} items={items} key={outfit.id} onAccept={accept} accepted={acceptedId === outfit.id} />
+              <OutfitCard
+                outfit={outfit}
+                items={items}
+                key={outfit.id}
+                onAccept={accept}
+                accepted={acceptedId === outfit.id}
+                recommended={outfit.id === recommendedId}
+              />
             ))}
           </div>
           {outfits.length > 1 ? (

@@ -286,6 +286,7 @@ export async function recommendOutfitsWithOfoxAnthropic(
     "- Each outfit includes at least 1 top, 1 bottom and 1 pair of shoes; outer and accessory optional.",
     "- No more than 3 main colors.",
     `- Keep formality close to ${hint.formality} (1=very casual, 5=very formal).`,
+    "- Order the outfits best-first: the FIRST outfit must be your single strongest recommendation for this occasion.",
     "- Write everything (style, reason, color_logic) in ENGLISH, in a warm professional stylist voice — not bullet points.",
   ].join("\n");
 

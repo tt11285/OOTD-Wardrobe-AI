@@ -19,11 +19,13 @@ export function OutfitCard({
   items,
   onAccept,
   accepted = false,
+  recommended = false,
 }: {
   outfit: OutfitCandidate;
   items: StoredClothingItem[];
   onAccept: (id: string) => void;
   accepted?: boolean;
+  recommended?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -32,7 +34,7 @@ export function OutfitCard({
     .filter((item): item is StoredClothingItem => Boolean(item));
 
   return (
-    <article className={`outfit-card${accepted ? " is-accepted" : ""}`}>
+    <article className={`outfit-card${accepted ? " is-accepted" : ""}${recommended ? " is-recommended" : ""}`}>
       <div className="outfit-collage" data-count={selected.length}>
         {selected.map((item) => (
           <div className="outfit-tile" key={item.id}>
@@ -51,7 +53,10 @@ export function OutfitCard({
       <div className="outfit-body">
         <div className="outfit-head">
           <p className="outfit-style">{outfit.style}</p>
-          {accepted ? <span className="status-badge success">Today&apos;s pick</span> : null}
+          <div className="outfit-badges">
+            {recommended ? <span className="status-badge recommended">★ Top pick</span> : null}
+            {accepted ? <span className="status-badge success">Today&apos;s pick</span> : null}
+          </div>
         </div>
 
         <h2>{outfit.reason}</h2>

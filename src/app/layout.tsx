@@ -21,7 +21,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "OOTD",
-  description: "AI Native wardrobe styling assistant",
+  description: "Dressy — your personal wardrobe stylist",
 };
 
 export const viewport: Viewport = {

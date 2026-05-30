@@ -118,7 +118,7 @@ export default function OutfitsPage() {
       <header className="screen-header">
         <p className="eyebrow">OOTD</p>
         <h1>What to wear today?</h1>
-        <p>Describe the occasion in a line — AI picks from your real wardrobe.</p>
+        <p>Tell Dressy the occasion in a line — she picks from your real wardrobe.</p>
       </header>
 
       <section className="occasion-panel">

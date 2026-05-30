@@ -204,7 +204,7 @@ export default function UploadPage() {
     // Show previews immediately after compression
     setPreviews(compressed);
     setPhase("recognizing");
-    setMessage("AI cutout + recognition, about 10–20s…");
+    setMessage("Dressy is cutting out & recognizing, about 10–20s…");
 
     let data: {
       results?: RecognitionResult[];
@@ -337,7 +337,7 @@ export default function UploadPage() {
     <main className="app-page mobile-shell">
       <header className="screen-header">
         <p className="eyebrow">ADD</p>
-        <h1>Snap your clothes — let AI learn your wardrobe.</h1>
+        <h1>Snap your clothes — let Dressy learn your wardrobe.</h1>
         <p>Up to 10 photos per batch, multiple pieces per photo. Aim to add 30–100 items in your first 10 minutes.</p>
       </header>
 
@@ -355,7 +355,7 @@ export default function UploadPage() {
           {isLoading ? (
             <>
               <span className="upload-spinner" aria-hidden="true" />
-              {phase === "compressing" ? "Processing…" : "AI scanning…"}
+              {phase === "compressing" ? "Processing…" : "Dressy is looking…"}
             </>
           ) : previews.length ? (
             "Add more clothes"

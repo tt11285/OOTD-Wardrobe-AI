@@ -102,7 +102,7 @@ export default function WardrobePage() {
           ))}
         </>
       ) : (
-        <EmptyState title="Your wardrobe is empty" copy="Upload a few real clothing photos so AI can style from your wardrobe." />
+        <EmptyState title="Your wardrobe is empty" copy="Upload a few real clothing photos so Dressy can style from your wardrobe." />
       )}
 
       {editing ? (

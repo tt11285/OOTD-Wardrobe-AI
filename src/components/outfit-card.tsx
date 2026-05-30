@@ -32,8 +32,6 @@ export function OutfitCard({
   const [expanded, setExpanded] = useState(false);
   const aspirational = outfit.kind === "aspirational";
 
-  // Prefer the structured pieces; fall back to selectedItems for persisted
-  // outfits (loaded from the DB) that predate the pieces field.
   const basePieces: OutfitPiece[] = outfit.pieces?.length
     ? outfit.pieces
     : outfit.selectedItems
@@ -51,6 +49,11 @@ export function OutfitCard({
       className={`outfit-card${accepted ? " is-accepted" : ""}${recommended ? " is-recommended" : ""}${aspirational ? " is-aspirational" : ""}`}
     >
       <div className="outfit-collage" data-count={pieces.length}>
+        {recommended ? (
+          <span className="outfit-ribbon">★ Top pick</span>
+        ) : aspirational ? (
+          <span className="outfit-ribbon outfit-ribbon--goal">Styling goal</span>
+        ) : null}
         {pieces.map((piece, i) => (
           <div className={`outfit-tile${piece.owned ? "" : " outfit-tile--suggested"}`} key={piece.itemId ?? `${piece.name}-${i}`}>
             {piece.owned && hasRealImage(piece.imageUrl) ? (
@@ -67,16 +70,8 @@ export function OutfitCard({
       </div>
 
       <div className="outfit-body">
-        <div className="outfit-head">
-          <p className="outfit-style">{outfit.style}</p>
-          <div className="outfit-badges">
-            {aspirational ? <span className="status-badge aspirational-badge">Styling goal</span> : null}
-            {recommended ? <span className="status-badge recommended">★ Top pick</span> : null}
-            {accepted ? <span className="status-badge success">Today&apos;s pick</span> : null}
-          </div>
-        </div>
-
-        <h2>{outfit.reason}</h2>
+        <p className="outfit-style">{outfit.style}</p>
+        <p className="outfit-reason">{outfit.reason}</p>
 
         <ul className="outfit-items">
           {pieces.map((piece, i) => (

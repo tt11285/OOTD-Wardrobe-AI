@@ -30,6 +30,11 @@ export default function WardrobePage() {
     setEditing(null);
   }
 
+  function handleDeleted(itemId: string) {
+    setItems((prev) => prev.filter((item) => item.id !== itemId));
+    setEditing(null);
+  }
+
   return (
     <main className="app-page mobile-shell">
       <header className="screen-header">
@@ -66,7 +71,7 @@ export default function WardrobePage() {
       )}
 
       {editing ? (
-        <EditItemModal item={editing} onClose={() => setEditing(null)} onSaved={handleSaved} />
+        <EditItemModal item={editing} onClose={() => setEditing(null)} onSaved={handleSaved} onDeleted={handleDeleted} />
       ) : null}
 
       <BottomNav />
@@ -79,10 +84,12 @@ function EditItemModal({
   item,
   onClose,
   onSaved,
+  onDeleted,
 }: {
   item: StoredClothingItem;
   onClose: () => void;
   onSaved: (item: StoredClothingItem) => void;
+  onDeleted: (itemId: string) => void;
 }) {
   const [name, setName] = useState(item.name);
   const [brand, setBrand] = useState(item.brand);
@@ -93,7 +100,35 @@ function EditItemModal({
   const [season, setSeason] = useState<string[]>(item.season);
   const [formality, setFormality] = useState(item.formality);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState("");
+
+  async function remove() {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+    setDeleting(true);
+    setError("");
+    try {
+      const response = await authedFetch("/api/items", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: item.userId, itemId: item.id }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        setDeleting(false);
+        setError(data.error ?? "Delete failed");
+        return;
+      }
+      onDeleted(item.id);
+    } catch {
+      setDeleting(false);
+      setError("Network error, please retry");
+    }
+  }
 
   async function save() {
     setSaving(true);
@@ -131,6 +166,11 @@ function EditItemModal({
   return (
     <div className="modal-overlay" onClick={onClose} role="presentation">
       <div className="modal-card" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Edit item">
+        <button className="modal-close" type="button" onClick={onClose} aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
         <h2>Edit item</h2>
 
         <label className="modal-field">
@@ -178,8 +218,14 @@ function EditItemModal({
         {error ? <p className="status-text status-error">{error}</p> : null}
 
         <div className="modal-actions">
-          <button className="secondary-button" type="button" onClick={onClose}>
-            Cancel
+          <button
+            className={`danger-button${confirmDelete ? " is-confirming" : ""}`}
+            type="button"
+            onClick={remove}
+            disabled={deleting}
+            onBlur={() => setConfirmDelete(false)}
+          >
+            {deleting ? "Deleting…" : confirmDelete ? "Confirm delete?" : "Delete"}
           </button>
           <button className="primary-button" type="button" onClick={save} disabled={saving}>
             {saving ? "Saving…" : "Save"}

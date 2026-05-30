@@ -1219,13 +1219,67 @@ h1 {
   animation: sheet-in 0.24s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
+.modal-card {
+  position: relative;
+}
+
 .modal-card h2 {
   margin: 0;
+  padding-right: 36px;
   font-family: var(--font-serif);
   font-size: 22px;
   font-weight: 500;
   color: var(--ink);
 }
+
+.modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.modal-close:hover {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+
+/* Destructive action button */
+.danger-button {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-full);
+  padding: 0 24px;
+  border: 1px solid var(--danger-text);
+  background: transparent;
+  color: var(--danger-text);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+}
+
+.danger-button:hover { background: var(--danger-bg); }
+
+.danger-button.is-confirming {
+  background: var(--danger-text);
+  color: #fff;
+}
+
+.danger-button:disabled { opacity: 0.5; cursor: default; }
 
 .modal-field {
   display: grid;
@@ -1272,6 +1326,7 @@ h1 {
 }
 
 .modal-actions .secondary-button,
+.modal-actions .danger-button,
 .modal-actions .primary-button {
   flex: 1;
 }

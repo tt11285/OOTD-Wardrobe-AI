@@ -195,6 +195,15 @@ export const memoryRepository = {
     return updated;
   },
 
+  async deleteItem(userId: string, itemId: string): Promise<boolean> {
+    const current = memory.items.get(itemId);
+    if (!current || current.userId !== userId) {
+      return false;
+    }
+    memory.items.delete(itemId);
+    return true;
+  },
+
   async saveRecognition(record: RecognitionRecord): Promise<RecognitionRecord> {
     memory.recognitions.set(record.id, record);
     return record;
@@ -421,6 +430,22 @@ export const supabaseRepository = {
     }
 
     return data ? toStoredClothingItem(data as ClothingItemRow) : null;
+  },
+
+  async deleteItem(userId: string, itemId: string): Promise<boolean> {
+    const client = createSupabaseServerClient();
+
+    if (!client) {
+      return memoryRepository.deleteItem(userId, itemId);
+    }
+
+    const { error } = await client.from("clothing_items").delete().eq("user_id", userId).eq("id", itemId);
+
+    if (error) {
+      throw supabaseError(error.message);
+    }
+
+    return true;
   },
 
   async saveRecognition(record: RecognitionRecord): Promise<RecognitionRecord> {

@@ -63,3 +63,20 @@ export async function PATCH(request: NextRequest) {
 
   return NextResponse.json({ item: updated });
 }
+
+export async function DELETE(request: NextRequest) {
+  const body = await request.json().catch(() => ({}));
+  const userId = await getRequestUserId(request, String(body.userId || "server-demo-user"));
+  const itemId = String(body.itemId || "");
+
+  if (!itemId) {
+    return NextResponse.json({ error: "Missing itemId" }, { status: 400 });
+  }
+
+  const ok = await repository.deleteItem(userId, itemId);
+  if (!ok) {
+    return NextResponse.json({ error: "Item not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({ ok: true });
+}

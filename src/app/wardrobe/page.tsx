@@ -11,19 +11,35 @@ import { useAuth } from "@/lib/state/user";
 import { authedFetch } from "@/lib/api/authed-fetch";
 import type { StoredClothingItem } from "@/lib/storage/repository";
 
+const CATEGORY_PLURAL: Record<ClothingCategory, string> = {
+  top: "Tops",
+  bottom: "Bottoms",
+  outer: "Outerwear",
+  shoes: "Shoes",
+  accessory: "Accessories",
+};
+
 export default function WardrobePage() {
   const { userId } = useAuth();
   const [items, setItems] = useState<StoredClothingItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<ClothingCategory | "all">("all");
   const [editing, setEditing] = useState<StoredClothingItem | null>(null);
 
   useEffect(() => {
     authedFetch(`/api/items?userId=${encodeURIComponent(userId)}`)
       .then((response) => response.json())
-      .then((data) => setItems(data.items ?? []));
+      .then((data) => setItems(data.items ?? []))
+      .finally(() => setLoading(false));
   }, [userId]);
 
-  const visible = filter === "all" ? items : items.filter((item) => item.category === filter);
+  // Group into category sections when viewing All; otherwise one section.
+  const groups =
+    filter === "all"
+      ? clothingCategories
+          .map((category) => ({ category, list: items.filter((it) => it.category === category) }))
+          .filter((g) => g.list.length)
+      : [{ category: filter, list: items.filter((it) => it.category === filter) }];
 
   function handleSaved(updated: StoredClothingItem) {
     setItems((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
@@ -43,7 +59,17 @@ export default function WardrobePage() {
         <p>{items.length ? `${items.length} item${items.length > 1 ? "s" : ""} in your wardrobe` : "Snap a few clothes to get started."}</p>
       </header>
 
-      {items.length ? (
+      {loading ? (
+        <section className="item-grid">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div className="item-skeleton" key={i}>
+              <div className="skeleton skeleton-img" />
+              <div className="skeleton skeleton-line" />
+              <div className="skeleton skeleton-line short" />
+            </div>
+          ))}
+        </section>
+      ) : items.length ? (
         <>
           <div className="filter-row">
             <button className={filter === "all" ? "chip active" : "chip"} onClick={() => setFilter("all")} type="button">
@@ -60,11 +86,20 @@ export default function WardrobePage() {
               </button>
             ))}
           </div>
-          <section className="item-grid">
-            {visible.map((item) => (
-              <ItemCard item={item} key={item.id} onEdit={setEditing} />
-            ))}
-          </section>
+
+          {groups.map((group) => (
+            <section className="wardrobe-group" key={group.category}>
+              <div className="group-head">
+                <h2 className="group-title">{CATEGORY_PLURAL[group.category]}</h2>
+                <span className="group-count">{group.list.length}</span>
+              </div>
+              <div className="item-grid">
+                {group.list.map((item) => (
+                  <ItemCard item={item} key={item.id} onEdit={setEditing} />
+                ))}
+              </div>
+            </section>
+          ))}
         </>
       ) : (
         <EmptyState title="Your wardrobe is empty" copy="Upload a few real clothing photos so AI can style from your wardrobe." />

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { BottomNav } from "@/components/bottom-nav";
 import { EmptyState } from "@/components/empty-state";
 import { OutfitCard } from "@/components/outfit-card";
+import { ShareCard } from "@/components/share-card";
 import { occasionTags } from "@/lib/domain/occasion";
 import { categoryLabel } from "@/lib/domain/outfits";
 import { useAuth } from "@/lib/state/user";
@@ -22,6 +23,7 @@ export default function OutfitsPage() {
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [acceptedId, setAcceptedId] = useState<string | null>(null);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [sharing, setSharing] = useState<OutfitCandidate | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -134,7 +136,9 @@ export default function OutfitsPage() {
         {message ? <p className="status-text">{message}</p> : null}
       </section>
 
-      {outfits.length ? (
+      {isLoading ? <div className="skeleton outfit-skeleton" aria-hidden="true" /> : null}
+
+      {!isLoading && outfits.length ? (
         <section className="outfit-result">
           <div className="outfit-result-head">
             <span>{outfits.length} looks for &ldquo;{occasion}&rdquo;</span>
@@ -147,6 +151,7 @@ export default function OutfitsPage() {
                 items={items}
                 key={outfit.id}
                 onAccept={accept}
+                onShare={setSharing}
                 accepted={acceptedId === outfit.id}
                 recommended={outfit.id === recommendedId}
               />
@@ -166,9 +171,11 @@ export default function OutfitsPage() {
             </div>
           ) : null}
         </section>
-      ) : items.length ? null : (
+      ) : !isLoading && !items.length ? (
         <EmptyState title="No wardrobe to style yet" copy="Add at least a top, a bottom and shoes to generate a full look." />
-      )}
+      ) : null}
+
+      {sharing ? <ShareCard outfit={sharing} items={items} onClose={() => setSharing(null)} /> : null}
 
       <BottomNav />
     </main>

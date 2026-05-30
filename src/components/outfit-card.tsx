@@ -20,12 +20,14 @@ export function OutfitCard({
   outfit,
   items,
   onAccept,
+  onShare,
   accepted = false,
   recommended = false,
 }: {
   outfit: OutfitCandidate;
   items: StoredClothingItem[];
   onAccept: (id: string) => void;
+  onShare?: (outfit: OutfitCandidate) => void;
   accepted?: boolean;
   recommended?: boolean;
 }) {
@@ -115,6 +117,12 @@ export function OutfitCard({
             {accepted ? "✓ Selected" : "Wear this today"}
           </button>
         )}
+
+        {onShare ? (
+          <button className="outfit-share" type="button" onClick={() => onShare(outfit)}>
+            Share this look
+          </button>
+        ) : null}
       </div>
     </article>
   );

@@ -2016,3 +2016,132 @@ h1 {
   .at-rise { animation: none; }
   .at-card:hover .at-card-img img { transform: none; }
 }
+
+/* ═══ Phase 3/4 — gallery sections, skeletons, delight, share card ═══════════ */
+
+/* Wardrobe category sections */
+.wardrobe-group { margin-top: 28px; }
+.group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.group-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--espresso);
+}
+.group-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #ece6df;
+  border-radius: var(--r-sm);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 252, 249, 0.7), transparent);
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.item-skeleton {
+  border: 1px solid var(--line-glass);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  overflow: hidden;
+  padding-bottom: 16px;
+}
+.skeleton-img { aspect-ratio: 4 / 5; border-radius: 0; }
+.skeleton-line { height: 13px; margin: 14px 16px 0; }
+.skeleton-line.short { width: 55%; }
+.outfit-skeleton {
+  height: 320px;
+  border-radius: var(--r-lg);
+  margin-top: 20px;
+}
+
+/* Landing — gentle phone float */
+@keyframes phone-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@media (min-width: 900px) {
+  .landing-phones .phone { animation: phone-float 6s ease-in-out infinite; }
+  .landing-phones .phone:nth-child(2) { animation-delay: -2s; }
+  .landing-phones .phone:nth-child(3) { animation-delay: -4s; }
+}
+
+/* Accept celebratory flourish */
+@keyframes accept-pop {
+  0% { box-shadow: 0 0 0 0 rgba(176, 112, 80, 0.45), var(--shadow); }
+  60% { box-shadow: 0 0 0 10px rgba(176, 112, 80, 0), var(--shadow); }
+  100% { box-shadow: 0 0 0 2px var(--accent), var(--shadow); }
+}
+.outfit-card.is-accepted { animation: accept-pop 0.6s ease-out; }
+
+/* Share card modal */
+.share-card {
+  width: 340px;
+  max-width: 100%;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+.share-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 16px 18px 12px;
+}
+.share-card-brand { font-family: var(--font-serif); font-size: 18px; font-weight: 600; color: var(--espresso); letter-spacing: 0.02em; }
+.share-card-occasion { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+.share-card-collage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: #ede8e2;
+}
+.share-card-collage span { aspect-ratio: 1; background: #fff; }
+.share-card-collage img { width: 100%; height: 100%; object-fit: contain; padding: 8%; }
+.share-card-body { padding: 16px 18px 20px; }
+.share-card-style { margin: 0; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.share-card-reason { margin: 8px 0 0; font-family: var(--font-serif); font-style: italic; font-size: 15px; line-height: 1.5; color: var(--espresso); }
+.share-card-foot { margin: 14px 0 0; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-light); }
+.share-actions { display: flex; gap: 10px; margin-top: 18px; }
+.share-actions .primary-button, .share-actions .secondary-button { flex: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after { animation: none; }
+  .landing-phones .phone { animation: none; }
+  .outfit-card.is-accepted { animation: none; }
+}
+
+.share-wrap { display: grid; gap: 14px; width: min(100%, 360px); }
+.outfit-share {
+  justify-self: start;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+.outfit-share:hover { color: var(--accent-strong); }

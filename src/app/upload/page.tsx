@@ -164,6 +164,8 @@ export default function UploadPage() {
   const [phase, setPhase] = useState<"idle" | "compressing" | "recognizing" | "done" | "error">("idle");
   const [message, setMessage] = useState("");
   const [confirmedCount, setConfirmedCount] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
 
   async function onFiles(files: FileList | null) {
     if (!files?.length) return;
@@ -306,6 +308,31 @@ export default function UploadPage() {
     setResults([]);
   }
 
+  function handleCarouselScroll() {
+    const el = carouselRef.current;
+    if (!el) return;
+    const cards = Array.from(el.querySelectorAll<HTMLElement>(".confirm-card"));
+    const center = el.scrollLeft + el.clientWidth / 2;
+    let best = 0;
+    let bestDist = Infinity;
+    cards.forEach((card, index) => {
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const dist = Math.abs(cardCenter - center);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = index;
+      }
+    });
+    setActiveIdx(best);
+  }
+
+  function scrollToCard(index: number) {
+    const el = carouselRef.current;
+    if (!el) return;
+    const card = el.querySelectorAll<HTMLElement>(".confirm-card")[index];
+    if (card) el.scrollTo({ left: card.offsetLeft - (el.clientWidth - card.clientWidth) / 2, behavior: "smooth" });
+  }
+
   return (
     <main className="app-page mobile-shell">
       <header className="screen-header">
@@ -370,16 +397,18 @@ export default function UploadPage() {
         </section>
       ) : null}
 
-      {/* ── Review & confirm ────────────────────────── */}
+      {/* ── Review & confirm (swipe horizontally) ───── */}
       {results.length ? (
         <section className="review-section">
           <div className="confirm-head">
-            <h2 className="section-title">Review &amp; confirm ({results.length})</h2>
+            <h2 className="section-title">
+              Review &amp; confirm <span className="confirm-count">{activeIdx + 1} / {results.length}</span>
+            </h2>
             <button className="secondary-button confirm-all" type="button" onClick={confirmAll}>
               Confirm all
             </button>
           </div>
-          <div className="review-list">
+          <div className="confirm-carousel" ref={carouselRef} onScroll={handleCarouselScroll}>
             {results.map((result) => (
               <ConfirmCard
                 key={result.item.id}
@@ -390,6 +419,19 @@ export default function UploadPage() {
               />
             ))}
           </div>
+          {results.length > 1 ? (
+            <div className="outfit-dots">
+              {results.map((result, index) => (
+                <button
+                  key={result.item.id}
+                  className={index === activeIdx ? "dot active" : "dot"}
+                  type="button"
+                  onClick={() => scrollToCard(index)}
+                  aria-label={`Go to item ${index + 1}`}
+                />
+              ))}
+            </div>
+          ) : null}
         </section>
       ) : null}
 

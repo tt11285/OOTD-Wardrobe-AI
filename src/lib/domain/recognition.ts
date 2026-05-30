@@ -50,7 +50,7 @@ export function clampConfidence(value: unknown): number {
 }
 
 export function normalizeRecognitionItem(raw: RawRecognitionItem): NormalizedRecognitionItem {
-  const name = typeof raw.name === "string" && raw.name.trim() ? raw.name.trim() : "未命名单品";
+  const name = typeof raw.name === "string" && raw.name.trim() ? raw.name.trim() : "Unnamed item";
   // Brand is never auto-detected (privacy / copyright) — user fills it in.
   const material = typeof raw.material === "string" ? raw.material.trim() : "";
 

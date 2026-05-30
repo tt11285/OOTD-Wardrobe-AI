@@ -78,6 +78,7 @@ NODE_USE_ENV_PROXY=1 node scripts/embed-style-references.mjs
 ## Supabase
 
 Run `supabase/schema.sql` in the Supabase SQL editor when the project is created.
+Apply incremental schema changes from **[docs/DB_MIGRATIONS.md](docs/DB_MIGRATIONS.md)**.
 
 ## Demo Script
 

@@ -1004,6 +1004,32 @@ h1 {
   object-fit: contain;
 }
 
+/* Horizontal swipe carousel for the confirm cards */
+.confirm-carousel {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -20px;
+  padding: 4px 20px 10px;
+  scrollbar-width: none;
+}
+
+.confirm-carousel::-webkit-scrollbar { display: none; }
+
+.confirm-carousel .confirm-card {
+  flex: 0 0 min(88%, 460px);
+  scroll-snap-align: center;
+}
+
+.confirm-count {
+  margin-left: 8px;
+  color: var(--accent);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
 .confirm-actions {
   display: flex;
   gap: 10px;

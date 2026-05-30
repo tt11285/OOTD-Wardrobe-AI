@@ -73,7 +73,7 @@ export async function recognizeWithOfoxAnthropic(imageUrls: string[], userId: st
       // caller can still display it in the UI with an error state.
       console.error(`[recognize] Image ${i + 1}/${imageUrls.length} failed:`, outcome.reason);
       const imageUrl = imageUrls[i];
-      const item = createDemoItem({ userId, imageUrl, name: "识别失败", category: "top" });
+      const item = createDemoItem({ userId, imageUrl, name: "Recognition failed", category: "top" });
       const record: RecognitionRecord = {
         id: createId(),
         userId,
@@ -112,7 +112,7 @@ async function recognizeSingleImage({
   // instead of letting the API call crash the entire batch.
   if (!CLAUDE_SUPPORTED_MIME.has(image.mediaType.toLowerCase())) {
     console.warn(`[recognize] Unsupported image format "${image.mediaType}" — skipping API call, returning failed result`);
-    const item = createDemoItem({ userId, imageUrl, name: "未知衣物", category: "top" });
+    const item = createDemoItem({ userId, imageUrl, name: "Unknown item", category: "top" });
     const record: RecognitionRecord = {
       id: createId(),
       userId,
@@ -208,16 +208,17 @@ async function recognizeSingleImage({
 
 function recognitionInstruction(): string {
   return [
-    "你是专业服装识别助手。请只识别图片中**最主要的一件**衣物（画面占比最大、最突出的那件），忽略其他次要单品。",
-    "只输出 JSON，不要解释，不要 Markdown。",
-    "items 数组只放这一件。JSON 格式必须是：",
-    '{"items":[{"name":"白色棉质衬衫","category":"top","material":"棉","colors":["白色"],"style_tags":["通勤","简约"],"season":["春","夏"],"formality":3,"confidence":0.9}]}',
-    "category 只能是 top, bottom, outer, shoes, accessory。",
-    "material 是面料的中文猜测（如 棉、羊毛、牛仔、皮革、针织、雪纺），看不清就留空字符串。",
-    "不要识别品牌（brand 由用户自己填）。",
-    "formality 是 1 到 5 的整数，1=很休闲，5=非常正式。",
-    "confidence 是 0 到 1 的数字。看不清时降低 confidence。",
-    "如果图片里没有衣物，输出 {\"items\":[]}。",
+    "You are a professional clothing recognition assistant. Identify ONLY the single most prominent garment in the image (the one taking up the most space). Ignore secondary items.",
+    "Output JSON only — no explanation, no Markdown.",
+    "The items array contains just that one garment. Format:",
+    '{"items":[{"name":"White cotton shirt","category":"top","material":"cotton","colors":["white"],"style_tags":["commute","minimal"],"season":["spring","summer"],"formality":3,"confidence":0.9}]}',
+    "category must be one of: top, bottom, outer, shoes, accessory.",
+    "ALL text values (name, material, colors, style_tags, season) MUST be in English.",
+    "material is a short English fabric guess (e.g. cotton, wool, denim, leather, knit, chiffon); empty string if unclear.",
+    "Do NOT identify brand (the user fills brand in themselves).",
+    "formality is an integer 1-5, 1=very casual, 5=very formal.",
+    "confidence is a number 0-1. Lower it when unsure.",
+    'If there is no garment in the image, output {"items":[]}.',
   ].join("\n");
 }
 
@@ -267,25 +268,25 @@ export async function recommendOutfitsWithOfoxAnthropic(
   const referencesBlock = formatReferencesForPrompt(references);
 
   const userPrompt = [
-    "你是一位法式极简风格 + 都市通勤美学的造型师。",
+    "You are a personal stylist with a French-minimal, urban-commute aesthetic.",
     stylePromptContext(hint),
     ...(referencesBlock
-      ? ["", "【参考案例（审美知识库召回，供参考，不要照抄）】", referencesBlock]
+      ? ["", "[Reference cases recalled from the aesthetic knowledge base — for inspiration only, do not copy verbatim]", referencesBlock]
       : []),
     "",
-    "下面是用户**真实衣橱**（请只引用这里的 id，不要编造）：",
+    "Here is the user's REAL wardrobe (only reference these ids, do not invent any):",
     JSON.stringify(wardrobeSummary, null, 2),
     "",
-    `今日场合：${occasion}`,
+    `Occasion: ${occasion}`,
     "",
-    "请生成 2-3 套搭配，输出严格的 JSON（不要 Markdown，不要解释），格式：",
-    '{"outfits":[{"selected_items":["id1","id2","id3"],"style":"法式极简","reason":"为什么这样搭，2-3 句即可","color_logic":"色彩搭配说明，1-2 句"}]}',
+    "Generate 2-3 outfits. Output STRICT JSON (no Markdown, no explanation), format:",
+    '{"outfits":[{"selected_items":["id1","id2","id3"],"style":"French minimal","reason":"why this works, 2-3 sentences","color_logic":"color pairing rationale, 1-2 sentences"}]}',
     "",
-    "硬规则：",
-    "- 每套至少包含 1 件 top、1 件 bottom、1 件 shoes，可选 outer 和 accessory。",
-    "- 全身主色不超过 3 种。",
-    `- 正式度要贴近 ${hint.formality}（1=很休闲，5=很正式）。`,
-    "- reason 要中文，像专业造型师在和好友说话，不要列条目。",
+    "Hard rules:",
+    "- Each outfit includes at least 1 top, 1 bottom and 1 pair of shoes; outer and accessory optional.",
+    "- No more than 3 main colors.",
+    `- Keep formality close to ${hint.formality} (1=very casual, 5=very formal).`,
+    "- Write everything (style, reason, color_logic) in ENGLISH, in a warm professional stylist voice — not bullet points.",
   ].join("\n");
 
   const response = await fetch(url, {

@@ -19,7 +19,7 @@ describe("recognition domain", () => {
       confidence: 1.5,
     });
 
-    expect(item.name).toBe("未命名单品");
+    expect(item.name).toBe("Unnamed item");
     expect(item.category).toBe("accessory");
     expect(item.confidence).toBe(1);
   });
@@ -54,7 +54,7 @@ describe("occasion domain", () => {
 
   it("matches English free-text occasions case-insensitively", () => {
     expect(occasionHint("interview tomorrow").formality).toBe(4);
-    expect(occasionHint("weekend trip").style).toBe("轻松舒适");
+    expect(occasionHint("weekend trip").style).toBe("relaxed and easy");
   });
 
   it("falls back to a sensible default for unknown occasions", () => {

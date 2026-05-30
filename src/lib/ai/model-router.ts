@@ -1,6 +1,7 @@
 import { confidenceTier, normalizeRecognitionItem } from "@/lib/domain/recognition";
 import { getWardrobeReadiness } from "@/lib/domain/outfits";
 import { recognizeWithOfoxAnthropic, recommendOutfitsWithOfoxAnthropic } from "@/lib/ai/ofox-anthropic";
+import { getCuratedOutfits } from "@/lib/style/curated-outfits";
 import type { RecognitionRecord, StoredClothingItem, OutfitCandidate, OutfitPiece } from "@/lib/storage/repository";
 import { createDemoItem, createId, nowIso } from "@/lib/storage/repository";
 
@@ -152,6 +153,13 @@ export async function generateDemoOutfits(items: StoredClothingItem[], occasion:
 }
 
 export async function generateOutfits(items: StoredClothingItem[], occasion: string): Promise<OutfitCandidate[]> {
+  // Demo path: hand-curated, guaranteed-beautiful looks for preset occasions
+  // when the wardrobe contains the named pieces. Falls through otherwise.
+  const curated = getCuratedOutfits(occasion, items);
+  if (curated.length >= 2) {
+    return curated;
+  }
+
   // Use real Claude recommendations when ofox-anthropic is configured
   if (process.env.OOTD_RECOGNITION_PROVIDER === "ofox-anthropic" && process.env.OFOX_API_KEY) {
     try {

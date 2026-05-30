@@ -122,6 +122,12 @@ const demoItems = [
   { name: "Camel trench coat",         category: "outer",     colors: ["Camel"],     material: "Cotton gabardine",style_tags: ["French", "Commute"],   formality: 3, rgb: [184, 161, 126], desc: "a classic camel trench coat" },
   { name: "Navy blazer",               category: "outer",     colors: ["Navy"],      material: "Wool",            style_tags: ["Sharp", "Formal"],     formality: 4, rgb: [40, 52, 82],   desc: "a navy tailored blazer" },
   { name: "Brown leather belt",        category: "accessory", colors: ["Brown"],     material: "Leather",         style_tags: ["Refined", "Accent"],   formality: 3, rgb: [110, 78, 52],  desc: "a brown leather belt" },
+  { name: "Ivory silk blouse",         category: "top",       colors: ["Ivory"],     material: "Silk",            style_tags: ["Elegant", "Refined"],  formality: 4, rgb: [240, 235, 225], desc: "an ivory silk blouse" },
+  { name: "Black wool coat",           category: "outer",     colors: ["Black"],     material: "Wool",            style_tags: ["Sharp", "Formal"],     formality: 4, rgb: [26, 26, 28],   desc: "a long black wool overcoat" },
+  { name: "Black heeled pumps",        category: "shoes",     colors: ["Black"],     material: "Leather",         style_tags: ["Elegant", "Formal"],   formality: 4, rgb: [24, 24, 26],   desc: "black leather pointed heeled pumps" },
+  { name: "Camel silk scarf",          category: "accessory", colors: ["Camel"],     material: "Silk",            style_tags: ["Refined", "Accent"],   formality: 3, rgb: [184, 161, 126], desc: "a folded camel silk scarf" },
+  { name: "Black leather tote",        category: "accessory", colors: ["Black"],     material: "Leather",         style_tags: ["Refined", "Everyday"], formality: 3, rgb: [32, 32, 35],   desc: "a structured black leather tote bag" },
+  { name: "Gold hoop earrings",        category: "accessory", colors: ["Gold"],      material: "Metal",           style_tags: ["Accent", "Refined"],   formality: 3, rgb: [201, 162, 77],  desc: "a pair of gold hoop earrings" },
 ];
 
 // ─── 1. Clean existing demo-user data ────────────────────────────────────────

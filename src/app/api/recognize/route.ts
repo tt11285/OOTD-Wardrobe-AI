@@ -43,12 +43,11 @@ export async function POST(request: NextRequest) {
       }),
     );
 
+    // Nothing is auto-saved anymore — every candidate goes to the confirm UI
+    // and is only persisted when the user confirms it. We still log the raw
+    // recognition record for analytics.
     for (const result of enrichedResults) {
-      const savedItem = result.status === "auto_accepted" ? await repository.saveItem(result.item) : null;
-      await repository.saveRecognition({
-        ...result.record,
-        finalItemId: savedItem?.id ?? null,
-      });
+      await repository.saveRecognition({ ...result.record, finalItemId: null });
     }
 
     const processedCount = enrichedResults.filter((r) => r.imageProcessed).length;

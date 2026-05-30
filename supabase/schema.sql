@@ -4,6 +4,8 @@ create table if not exists clothing_items (
   image_url text not null,
   category text not null check (category in ('top', 'bottom', 'outer', 'shoes', 'accessory')),
   name text not null,
+  brand text,
+  material text,
   colors text[] not null default '{}',
   style_tags text[] not null default '{}',
   season text[] not null default '{}',

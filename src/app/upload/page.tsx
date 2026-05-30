@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { BottomNav } from "@/components/bottom-nav";
+import { TagInput } from "@/components/tag-input";
 import { useAuth } from "@/lib/state/user";
 import { authedFetch } from "@/lib/api/authed-fetch";
 import type { StoredClothingItem } from "@/lib/storage/repository";
@@ -162,6 +163,7 @@ export default function UploadPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [phase, setPhase] = useState<"idle" | "compressing" | "recognizing" | "done" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [confirmedCount, setConfirmedCount] = useState(0);
 
   async function onFiles(files: FileList | null) {
     if (!files?.length) return;
@@ -182,6 +184,7 @@ export default function UploadPage() {
     }
 
     setResults([]);
+    setConfirmedCount(0);
     setIsLoading(true);
     setPhase("compressing");
     setMessage(`Compressing ${selected.length} image${selected.length > 1 ? "s" : ""}…`);
@@ -248,39 +251,60 @@ export default function UploadPage() {
       },
     );
 
-    const autoCount = enriched.filter((r) => r.status === "auto_accepted").length;
-    const reviewCount = enriched.filter((r) => r.status === "needs_review").length;
-    const failedCount = enriched.filter((r) => r.status === "failed").length;
     const processedCount = data.imageProcessedCount ?? 0;
 
     setResults(enriched);
     setIsLoading(false);
     setPhase("done");
     setMessage(
-      [
-        autoCount ? `✅ ${autoCount} auto-added` : null,
-        reviewCount ? `🔍 ${reviewCount} to confirm` : null,
-        failedCount ? `❌ ${failedCount} failed` : null,
-        processedCount ? `🪄 ${processedCount} cut out` : null,
-      ]
-        .filter(Boolean)
-        .join("　") || "Recognition complete",
+      `Recognized ${enriched.length} item${enriched.length > 1 ? "s" : ""}${processedCount ? ` · ${processedCount} cut out` : ""}. Review and confirm below.`,
     );
   }
 
-  async function saveReviewed(item: StoredClothingItem) {
+  // Update one pending card's field as the user edits (parent holds the source
+  // of truth so "Confirm all" picks up edits).
+  function patchCard(id: string, patch: Partial<StoredClothingItem>) {
+    setResults((prev) => prev.map((r) => (r.item.id === id ? { ...r, item: { ...r.item, ...patch } } : r)));
+  }
+
+  async function postItem(item: StoredClothingItem) {
     await authedFetch("/api/items", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...item, userId, manuallyEdited: true }),
+      body: JSON.stringify({
+        id: item.id,
+        userId,
+        imageUrl: item.imageUrl,
+        name: item.name,
+        brand: item.brand,
+        material: item.material,
+        category: item.category,
+        colors: item.colors,
+        styleTags: item.styleTags,
+        season: item.season,
+        formality: item.formality,
+        confidence: item.confidence,
+        manuallyEdited: true,
+      }),
     });
-    // Remove from results after save
-    setResults((prev) => prev.filter((r) => r.item.id !== item.id));
   }
 
-  const autoAccepted = results.filter((r) => r.status === "auto_accepted");
-  const needsReview = results.filter((r) => r.status === "needs_review");
-  const failed = results.filter((r) => r.status === "failed");
+  async function confirmCard(item: StoredClothingItem) {
+    await postItem(item);
+    setResults((prev) => prev.filter((r) => r.item.id !== item.id));
+    setConfirmedCount((c) => c + 1);
+  }
+
+  function discardCard(id: string) {
+    setResults((prev) => prev.filter((r) => r.item.id !== id));
+  }
+
+  async function confirmAll() {
+    const items = results.map((r) => r.item);
+    await Promise.all(items.map(postItem));
+    setConfirmedCount((c) => c + items.length);
+    setResults([]);
+  }
 
   return (
     <main className="app-page mobile-shell">
@@ -346,38 +370,33 @@ export default function UploadPage() {
         </section>
       ) : null}
 
-      {/* ── Review sections ─────────────────────────── */}
-      {needsReview.length ? (
+      {/* ── Review & confirm ────────────────────────── */}
+      {results.length ? (
         <section className="review-section">
-          <h2 className="section-title warning-title">🔍 Needs your confirmation ({needsReview.length})</h2>
+          <div className="confirm-head">
+            <h2 className="section-title">Review &amp; confirm ({results.length})</h2>
+            <button className="secondary-button confirm-all" type="button" onClick={confirmAll}>
+              Confirm all
+            </button>
+          </div>
           <div className="review-list">
-            {needsReview.map((result) => (
-              <ReviewCard key={result.item.id} result={result} onSave={saveReviewed} />
+            {results.map((result) => (
+              <ConfirmCard
+                key={result.item.id}
+                result={result}
+                onPatch={patchCard}
+                onConfirm={confirmCard}
+                onDiscard={discardCard}
+              />
             ))}
           </div>
         </section>
       ) : null}
 
-      {autoAccepted.length ? (
-        <section className="review-section">
-          <h2 className="section-title success-title">✅ Auto-added ({autoAccepted.length})</h2>
-          <div className="review-list">
-            {autoAccepted.map((result) => (
-              <ReviewCard key={result.item.id} result={result} onSave={saveReviewed} />
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {failed.length ? (
-        <section className="review-section">
-          <h2 className="section-title failed-title">❌ Failed — retake suggested ({failed.length})</h2>
-          <div className="review-list">
-            {failed.map((result) => (
-              <ReviewCard key={result.item.id} result={result} onSave={saveReviewed} />
-            ))}
-          </div>
-        </section>
+      {confirmedCount ? (
+        <p className="status-text status-done" role="status">
+          ✅ {confirmedCount} added to your wardrobe.
+        </p>
       ) : null}
 
       <BottomNav />
@@ -385,77 +404,85 @@ export default function UploadPage() {
   );
 }
 
-// ─── ReviewCard ──────────────────────────────────────────────────────────────
-function ReviewCard({
+// ─── ConfirmCard ─────────────────────────────────────────────────────────────
+function ConfirmCard({
   result,
-  onSave,
+  onPatch,
+  onConfirm,
+  onDiscard,
 }: {
   result: RecognitionResult;
-  onSave: (item: StoredClothingItem) => void;
+  onPatch: (id: string, patch: Partial<StoredClothingItem>) => void;
+  onConfirm: (item: StoredClothingItem) => void;
+  onDiscard: (id: string) => void;
 }) {
-  const [item, setItem] = useState(result.item);
-  const auto = result.status === "auto_accepted";
-  const failed = result.status === "failed";
+  const { item, status } = result;
+  const hint =
+    status === "auto_accepted"
+      ? { cls: "success", label: "High confidence" }
+      : status === "failed"
+        ? { cls: "failed-badge", label: "Low — check carefully" }
+        : { cls: "warning", label: "Please verify" };
 
   return (
-    <article className={`review-card ${failed ? "review-card--failed" : ""}`}>
+    <article className="confirm-card">
       <div className="review-card-image">
-        {item.imageUrl ? (
-          <img alt={item.name} src={item.imageUrl} />
-        ) : (
-          <div className="review-card-no-image">No image</div>
-        )}
+        {item.imageUrl ? <img alt={item.name} src={item.imageUrl} /> : <div className="review-card-no-image">No image</div>}
       </div>
       <div className="review-fields">
-        <span
-          className={
-            auto ? "status-badge success" : failed ? "status-badge failed-badge" : "status-badge warning"
-          }
-        >
-          {auto ? "Auto-added" : failed ? "Failed" : "To confirm"}
-        </span>
-        {!failed && (
-          <>
-            <input
-              aria-label="Name"
-              value={item.name}
-              onChange={(e) => setItem({ ...item, name: e.target.value })}
-            />
-            <select
-              aria-label="Category"
-              value={item.category}
-              onChange={(e) => setItem({ ...item, category: e.target.value as ClothingCategory })}
-            >
-              {clothingCategories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {categoryLabel(cat)}
-                </option>
-              ))}
-            </select>
-            <input
-              aria-label="Colors (comma separated)"
-              value={item.colors.join(", ")}
-              onChange={(e) => setItem({ ...item, colors: splitTags(e.target.value) })}
-            />
-            {!auto ? (
-              <button className="primary-button" onClick={() => onSave(item)} type="button">
-                Add to wardrobe
-              </button>
-            ) : null}
-          </>
-        )}
-        {failed && (
-          <p className="failed-hint">Too dark or too occluded — retake the photo and upload again.</p>
-        )}
+        <span className={`status-badge ${hint.cls}`}>{hint.label}</span>
+
+        <label className="modal-field">
+          <span>Name</span>
+          <input value={item.name} onChange={(e) => onPatch(item.id, { name: e.target.value })} />
+        </label>
+
+        <label className="modal-field">
+          <span>Category</span>
+          <select value={item.category} onChange={(e) => onPatch(item.id, { category: e.target.value as ClothingCategory })}>
+            {clothingCategories.map((cat) => (
+              <option key={cat} value={cat}>
+                {categoryLabel(cat)}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="modal-field">
+          <span>Brand</span>
+          <input value={item.brand} placeholder="optional" onChange={(e) => onPatch(item.id, { brand: e.target.value })} />
+        </label>
+
+        <label className="modal-field">
+          <span>Material</span>
+          <input value={item.material} placeholder="e.g. cotton" onChange={(e) => onPatch(item.id, { material: e.target.value })} />
+        </label>
+
+        <TagInput label="Colors" tags={item.colors} onChange={(t) => onPatch(item.id, { colors: t })} placeholder="add color" />
+        <TagInput label="Style" tags={item.styleTags} onChange={(t) => onPatch(item.id, { styleTags: t })} placeholder="add tag" />
+        <TagInput label="Season" tags={item.season} onChange={(t) => onPatch(item.id, { season: t })} placeholder="add season" />
+
+        <label className="modal-field">
+          <span>Formality · {item.formality}</span>
+          <input
+            type="range"
+            min={1}
+            max={5}
+            step={1}
+            value={item.formality}
+            onChange={(e) => onPatch(item.id, { formality: Number(e.target.value) })}
+          />
+        </label>
+
+        <div className="confirm-actions">
+          <button className="secondary-button" type="button" onClick={() => onDiscard(item.id)}>
+            Discard
+          </button>
+          <button className="primary-button" type="button" onClick={() => onConfirm(item)}>
+            Confirm
+          </button>
+        </div>
       </div>
     </article>
   );
-}
-
-// ─── String helpers ──────────────────────────────────────────────────────────
-function splitTags(value: string): string[] {
-  return value
-    .split(/[、,，]/)
-    .map((s) => s.trim())
-    .filter(Boolean);
 }

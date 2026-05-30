@@ -39,6 +39,8 @@ function item(id: string, category: StoredClothingItem["category"]): StoredCloth
     imageUrl: "",
     category,
     name: id,
+    brand: "",
+    material: "",
     colors: ["黑色"],
     styleTags: ["简约"],
     season: ["春"],

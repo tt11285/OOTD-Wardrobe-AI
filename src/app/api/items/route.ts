@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
     userId,
     imageUrl,
     name: String(body.name || "未命名单品"),
+    brand: typeof body.brand === "string" ? body.brand.trim() : "",
+    material: typeof body.material === "string" ? body.material.trim() : "",
     category,
     colors: normalizeStringList(body.colors),
     styleTags: normalizeStringList(body.styleTags),
@@ -45,6 +47,8 @@ export async function PATCH(request: NextRequest) {
   const itemId = String(body.itemId || "");
   const updated = await repository.updateItem(userId, itemId, {
     name: typeof body.name === "string" ? body.name : undefined,
+    brand: typeof body.brand === "string" ? body.brand.trim() : undefined,
+    material: typeof body.material === "string" ? body.material.trim() : undefined,
     category: isClothingCategory(body.category) ? body.category : undefined,
     colors: Array.isArray(body.colors) ? normalizeStringList(body.colors) : undefined,
     styleTags: Array.isArray(body.styleTags) ? normalizeStringList(body.styleTags) : undefined,

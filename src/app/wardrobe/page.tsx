@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { BottomNav } from "@/components/bottom-nav";
 import { EmptyState } from "@/components/empty-state";
 import { ItemCard } from "@/components/item-card";
+import { TagInput } from "@/components/tag-input";
 import { clothingCategories, type ClothingCategory } from "@/lib/domain/clothing";
 import { categoryLabel } from "@/lib/domain/outfits";
 import { useAuth } from "@/lib/state/user";
@@ -84,8 +85,12 @@ function EditItemModal({
   onSaved: (item: StoredClothingItem) => void;
 }) {
   const [name, setName] = useState(item.name);
+  const [brand, setBrand] = useState(item.brand);
+  const [material, setMaterial] = useState(item.material);
   const [category, setCategory] = useState<ClothingCategory>(item.category);
-  const [colors, setColors] = useState(item.colors.join(", "));
+  const [colors, setColors] = useState<string[]>(item.colors);
+  const [styleTags, setStyleTags] = useState<string[]>(item.styleTags);
+  const [season, setSeason] = useState<string[]>(item.season);
   const [formality, setFormality] = useState(item.formality);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -101,8 +106,12 @@ function EditItemModal({
           userId: item.userId,
           itemId: item.id,
           name,
+          brand,
+          material,
           category,
-          colors: colors.split(/[,，、]/).map((c) => c.trim()).filter(Boolean),
+          colors,
+          styleTags,
+          season,
           formality,
         }),
       });
@@ -141,9 +150,18 @@ function EditItemModal({
         </label>
 
         <label className="modal-field">
-          <span>Colors</span>
-          <input value={colors} onChange={(e) => setColors(e.target.value)} placeholder="white, navy" />
+          <span>Brand</span>
+          <input value={brand} placeholder="optional" onChange={(e) => setBrand(e.target.value)} />
         </label>
+
+        <label className="modal-field">
+          <span>Material</span>
+          <input value={material} placeholder="e.g. cotton" onChange={(e) => setMaterial(e.target.value)} />
+        </label>
+
+        <TagInput label="Colors" tags={colors} onChange={setColors} placeholder="add color" />
+        <TagInput label="Style" tags={styleTags} onChange={setStyleTags} placeholder="add tag" />
+        <TagInput label="Season" tags={season} onChange={setSeason} placeholder="add season" />
 
         <label className="modal-field">
           <span>Formality · {formality}</span>

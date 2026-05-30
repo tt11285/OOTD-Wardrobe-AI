@@ -9,6 +9,8 @@ export type StoredClothingItem = Required<
     | "imageUrl"
     | "category"
     | "name"
+    | "brand"
+    | "material"
     | "colors"
     | "styleTags"
     | "season"
@@ -48,7 +50,7 @@ export type OutfitCandidate = {
 type ItemPatch = Partial<
   Pick<
     StoredClothingItem,
-    "name" | "category" | "colors" | "styleTags" | "season" | "formality" | "confidence" | "manuallyEdited"
+    "name" | "brand" | "material" | "category" | "colors" | "styleTags" | "season" | "formality" | "confidence" | "manuallyEdited"
   >
 >;
 
@@ -58,6 +60,8 @@ export type ClothingItemRow = {
   image_url: string;
   category: ClothingCategory;
   name: string;
+  brand: string | null;
+  material: string | null;
   colors: string[];
   style_tags: string[];
   season: string[];
@@ -113,6 +117,8 @@ export function createDemoItem(input: {
   name: string;
   category: ClothingCategory;
   imageUrl?: string;
+  brand?: string;
+  material?: string;
   colors?: string[];
   styleTags?: string[];
   season?: string[];
@@ -127,6 +133,8 @@ export function createDemoItem(input: {
     imageUrl: input.imageUrl ?? "",
     category: input.category,
     name: input.name,
+    brand: input.brand ?? "",
+    material: input.material ?? "",
     colors: input.colors ?? [],
     styleTags: input.styleTags ?? [],
     season: input.season ?? [],
@@ -210,6 +218,8 @@ export function toClothingItemRow(item: StoredClothingItem): ClothingItemRow {
     image_url: item.imageUrl,
     category: item.category,
     name: item.name,
+    brand: item.brand || null,
+    material: item.material || null,
     colors: item.colors,
     style_tags: item.styleTags,
     season: item.season,
@@ -228,6 +238,8 @@ export function toStoredClothingItem(row: ClothingItemRow): StoredClothingItem {
     imageUrl: row.image_url,
     category: row.category,
     name: row.name,
+    brand: row.brand ?? "",
+    material: row.material ?? "",
     colors: row.colors,
     styleTags: row.style_tags,
     season: row.season,
@@ -301,6 +313,13 @@ function supabaseError(message: string): Error {
   return new Error(`Supabase repository error: ${message}`);
 }
 
+// True when the error is about the optional brand/material columns not existing
+// yet (so callers can retry without them). Lets the app work before the
+// `alter table … add column brand/material` migration is run.
+function isMissingNewColumn(message: string): boolean {
+  return /(brand|material)/i.test(message) && /(does not exist|could not find|schema cache|column)/i.test(message);
+}
+
 export const supabaseRepository = {
   async listItems(userId: string): Promise<StoredClothingItem[]> {
     const client = createSupabaseServerClient();
@@ -329,7 +348,17 @@ export const supabaseRepository = {
       return memoryRepository.saveItem(item);
     }
 
-    const { data, error } = await client.from("clothing_items").insert(toClothingItemRow(item)).select("*").single();
+    const row = toClothingItemRow(item);
+    let { data, error } = await client.from("clothing_items").insert(row).select("*").single();
+
+    // Graceful degradation: if the optional brand/material columns haven't been
+    // added to the DB yet, retry the insert without them so the item still saves.
+    if (error && isMissingNewColumn(error.message)) {
+      const { brand: _b, material: _m, ...rest } = row;
+      void _b;
+      void _m;
+      ({ data, error } = await client.from("clothing_items").insert(rest).select("*").single());
+    }
 
     if (error) {
       throw supabaseError(error.message);
@@ -347,6 +376,8 @@ export const supabaseRepository = {
 
     const rowPatch: Partial<ClothingItemRow> = {
       name: patch.name,
+      brand: patch.brand,
+      material: patch.material,
       category: patch.category,
       colors: patch.colors,
       style_tags: patch.styleTags,
@@ -357,13 +388,18 @@ export const supabaseRepository = {
       updated_at: nowIso(),
     };
     const cleanPatch = Object.fromEntries(Object.entries(rowPatch).filter(([, value]) => value !== undefined));
-    const { data, error } = await client
-      .from("clothing_items")
-      .update(cleanPatch)
-      .eq("user_id", userId)
-      .eq("id", itemId)
-      .select("*")
-      .maybeSingle();
+    const runUpdate = (patch: Record<string, unknown>) =>
+      client.from("clothing_items").update(patch).eq("user_id", userId).eq("id", itemId).select("*").maybeSingle();
+
+    let { data, error } = await runUpdate(cleanPatch);
+
+    // Graceful degradation when brand/material columns aren't in the DB yet.
+    if (error && isMissingNewColumn(error.message)) {
+      const { brand: _b, material: _m, ...rest } = cleanPatch;
+      void _b;
+      void _m;
+      ({ data, error } = await runUpdate(rest));
+    }
 
     if (error) {
       throw supabaseError(error.message);

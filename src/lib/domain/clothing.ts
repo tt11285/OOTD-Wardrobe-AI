@@ -8,6 +8,8 @@ export type ClothingItem = {
   imageUrl?: string;
   category: ClothingCategory;
   name?: string;
+  brand?: string;
+  material?: string;
   colors?: string[];
   styleTags?: string[];
   season?: string[];

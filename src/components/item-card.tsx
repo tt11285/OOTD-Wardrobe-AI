@@ -68,7 +68,7 @@ export function ItemCard({
         <div>
           <p className="item-name">{item.name}</p>
           <p className="item-meta">
-            {categoryLabel(item.category)} · Formality {item.formality}
+            {[categoryLabel(item.category), item.brand, item.material].filter(Boolean).join(" · ")}
           </p>
         </div>
         <div className="tag-row">

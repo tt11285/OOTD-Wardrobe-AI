@@ -172,44 +172,49 @@ async function recognizeSingleImage({
   }
 
   const parsed = extractJsonObject(text) as { items?: unknown[] };
+  // One image = one garment. If the model still returns several, keep only the
+  // single most prominent one (the first) so it matches the cutout.
   const rawItems = Array.isArray(parsed.items) && parsed.items.length ? parsed.items : [{}];
+  const raw = rawItems[0];
 
-  return rawItems.map((raw) => {
-    const normalized = normalizeRecognitionItem(raw as Record<string, unknown>);
-    const status = confidenceTier(normalized.confidence);
-    const item = createDemoItem({
-      userId,
-      imageUrl,
-      name: normalized.name,
-      category: normalized.category,
-      colors: normalized.colors,
-      styleTags: normalized.styleTags,
-      season: normalized.season,
-      formality: normalized.formality,
-      confidence: normalized.confidence,
-    });
-    const record: RecognitionRecord = {
-      id: createId(),
-      userId,
-      imageUrl,
-      rawOutput: raw,
-      confidence: normalized.confidence,
-      status,
-      finalItemId: status === "auto_accepted" ? item.id : null,
-      createdAt: nowIso(),
-    };
-
-    return { record, item, status };
+  const normalized = normalizeRecognitionItem(raw as Record<string, unknown>);
+  const status = confidenceTier(normalized.confidence);
+  const item = createDemoItem({
+    userId,
+    imageUrl,
+    name: normalized.name,
+    brand: normalized.brand,
+    material: normalized.material,
+    category: normalized.category,
+    colors: normalized.colors,
+    styleTags: normalized.styleTags,
+    season: normalized.season,
+    formality: normalized.formality,
+    confidence: normalized.confidence,
   });
+  const record: RecognitionRecord = {
+    id: createId(),
+    userId,
+    imageUrl,
+    rawOutput: raw,
+    confidence: normalized.confidence,
+    status,
+    finalItemId: null,
+    createdAt: nowIso(),
+  };
+
+  return [{ record, item, status }];
 }
 
 function recognitionInstruction(): string {
   return [
-    "你是专业服装识别助手。请识别图片中所有可见衣物。",
+    "你是专业服装识别助手。请只识别图片中**最主要的一件**衣物（画面占比最大、最突出的那件），忽略其他次要单品。",
     "只输出 JSON，不要解释，不要 Markdown。",
-    "JSON 格式必须是：",
-    '{"items":[{"name":"白色棉质衬衫","category":"top","colors":["白色"],"style_tags":["通勤","简约"],"season":["春","夏"],"formality":3,"confidence":0.9}]}',
+    "items 数组只放这一件。JSON 格式必须是：",
+    '{"items":[{"name":"白色棉质衬衫","category":"top","material":"棉","colors":["白色"],"style_tags":["通勤","简约"],"season":["春","夏"],"formality":3,"confidence":0.9}]}',
     "category 只能是 top, bottom, outer, shoes, accessory。",
+    "material 是面料的中文猜测（如 棉、羊毛、牛仔、皮革、针织、雪纺），看不清就留空字符串。",
+    "不要识别品牌（brand 由用户自己填）。",
     "formality 是 1 到 5 的整数，1=很休闲，5=非常正式。",
     "confidence 是 0 到 1 的数字。看不清时降低 confidence。",
     "如果图片里没有衣物，输出 {\"items\":[]}。",

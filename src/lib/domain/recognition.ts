@@ -9,6 +9,8 @@ export type RecognitionStatus = "auto_accepted" | "needs_review" | "failed";
 
 export type NormalizedRecognitionItem = {
   name: string;
+  brand: string;
+  material: string;
   category: ClothingCategory;
   colors: string[];
   styleTags: string[];
@@ -19,6 +21,8 @@ export type NormalizedRecognitionItem = {
 
 type RawRecognitionItem = {
   name?: unknown;
+  brand?: unknown;
+  material?: unknown;
   category?: unknown;
   colors?: unknown;
   style_tags?: unknown;
@@ -47,9 +51,13 @@ export function clampConfidence(value: unknown): number {
 
 export function normalizeRecognitionItem(raw: RawRecognitionItem): NormalizedRecognitionItem {
   const name = typeof raw.name === "string" && raw.name.trim() ? raw.name.trim() : "未命名单品";
+  // Brand is never auto-detected (privacy / copyright) — user fills it in.
+  const material = typeof raw.material === "string" ? raw.material.trim() : "";
 
   return {
     name,
+    brand: "",
+    material,
     category: isClothingCategory(raw.category) ? raw.category : "accessory",
     colors: normalizeStringList(raw.colors),
     styleTags: normalizeStringList(raw.styleTags ?? raw.style_tags),

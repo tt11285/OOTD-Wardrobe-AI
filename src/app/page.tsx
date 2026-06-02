@@ -83,16 +83,21 @@ export default function HomePage() {
       <div className="landing-inner">
         {/* ── Left: hero ──────────────────────────────── */}
         <section className="landing-hero">
-          <p className="eyebrow">Meet Dressy</p>
-          <h1>Your wardrobe, styled by Dressy.</h1>
+          <p className="eyebrow">OOTD · Meet Dressy</p>
+          <h1>A full closet, and nothing to wear?</h1>
           <p className="hero-copy">
-            Dressy is your personal stylist — she learns every piece you own, then puts together
-            ready-to-wear looks for whatever the day asks of you.
+            Meet Dressy — the stylist who memorises your wardrobe. Snap your clothes once, then
+            just tell her the occasion and she puts together ready-to-wear looks in seconds.
           </p>
           <div className="hero-actions">
             <Link className="primary-button" href="/upload">Start with Dressy</Link>
             <Link className="secondary-button" href="/outfits">What to wear</Link>
           </div>
+          <ol className="hero-steps">
+            <li><span>1</span> Snap your clothes</li>
+            <li><span>2</span> Dressy learns them</li>
+            <li><span>3</span> Wear her picks</li>
+          </ol>
         </section>
 
         {/* ── Right: three phones mirroring the real pages ── */}

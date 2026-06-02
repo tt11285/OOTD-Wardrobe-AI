@@ -11,7 +11,7 @@ import { useAuth } from "@/lib/state/user";
 import { authedFetch } from "@/lib/api/authed-fetch";
 import type { OutfitCandidate, StoredClothingItem } from "@/lib/storage/repository";
 
-const loadingPhrases = ["Opening your wardrobe…", "Consulting the style library…", "Matching pieces…", "Writing the rationale…"];
+const loadingPhrases = ["Dressy is opening your wardrobe…", "Dressy is pulling pieces…", "Dressy is matching colors…", "Dressy is finishing the look…"];
 
 export default function OutfitsPage() {
   const { userId } = useAuth();
@@ -64,12 +64,12 @@ export default function OutfitsPage() {
 
     setOutfits(data.outfits ?? []);
     setItems(data.items ?? items);
-    setMessage((data.outfits ?? []).length ? "Done — swipe to browse the looks." : "No look this time. Try another occasion.");
+    setMessage((data.outfits ?? []).length ? "Here's what Dressy picked — swipe to browse." : "Dressy couldn't pull a look this time. Try another occasion.");
   }
 
   async function accept(outfitId: string) {
     setAcceptedId(outfitId);
-    setMessage("Saved — enjoy your day.");
+    setMessage("Saved — enjoy your day. — Dressy");
     await authedFetch("/api/outfits", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -116,7 +116,7 @@ export default function OutfitsPage() {
   return (
     <main className="app-page mobile-shell">
       <header className="screen-header">
-        <p className="eyebrow">OOTD</p>
+        <p className="eyebrow">Dressy · Styling</p>
         <h1>What to wear today?</h1>
         <p>Tell Dressy the occasion in a line — she picks from your real wardrobe.</p>
       </header>
@@ -172,7 +172,7 @@ export default function OutfitsPage() {
           ) : null}
         </section>
       ) : !isLoading && !items.length ? (
-        <EmptyState title="No wardrobe to style yet" copy="Add at least a top, a bottom and shoes to generate a full look." />
+        <EmptyState title="Dressy needs a little more to work with" copy="Add at least a top, a bottom and a pair of shoes, and she'll style a full look for you." />
       ) : null}
 
       {sharing ? <ShareCard outfit={sharing} items={items} onClose={() => setSharing(null)} /> : null}

@@ -54,9 +54,9 @@ export default function WardrobePage() {
   return (
     <main className="app-page mobile-shell">
       <header className="screen-header">
-        <p className="eyebrow">WARDROBE</p>
+        <p className="eyebrow">Dressy · Wardrobe</p>
         <h1>Your digital wardrobe</h1>
-        <p>{items.length ? `${items.length} item${items.length > 1 ? "s" : ""} in your wardrobe` : "Snap a few clothes to get started."}</p>
+        <p>{items.length ? `Dressy knows ${items.length} piece${items.length > 1 ? "s" : ""} in your wardrobe.` : "Snap a few clothes and Dressy will take it from here."}</p>
       </header>
 
       {loading ? (
@@ -102,7 +102,7 @@ export default function WardrobePage() {
           ))}
         </>
       ) : (
-        <EmptyState title="Your wardrobe is empty" copy="Upload a few real clothing photos so Dressy can style from your wardrobe." />
+        <EmptyState title="Your wardrobe is empty" copy="Show Dressy a few pieces and she'll take it from here — then she can style you any day." />
       )}
 
       {editing ? (

@@ -69,7 +69,7 @@ export function ShareCard({
           <div className="share-card-body">
             <p className="share-card-style">{outfit.style}</p>
             <p className="share-card-reason">{outfit.reason}</p>
-            <p className="share-card-foot">Styled with OOTD · by Dressy</p>
+            <p className="share-card-foot">Styled by Dressy · OOTD</p>
           </div>
         </div>
         <div className="share-actions">

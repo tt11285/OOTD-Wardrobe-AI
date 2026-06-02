@@ -336,9 +336,9 @@ export default function UploadPage() {
   return (
     <main className="app-page mobile-shell">
       <header className="screen-header">
-        <p className="eyebrow">ADD</p>
+        <p className="eyebrow">Dressy · Add</p>
         <h1>Snap your clothes — let Dressy learn your wardrobe.</h1>
-        <p>Up to 10 photos per batch, multiple pieces per photo. Aim to add 30–100 items in your first 10 minutes.</p>
+        <p>Up to 10 photos per batch, one main piece per photo. The more you show her, the better she styles you.</p>
       </header>
 
       {/* ── Upload zone ─────────────────────────────── */}

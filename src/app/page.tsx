@@ -88,7 +88,7 @@ export default function HomePage() {
             <DressyAvatar variant="portrait" size={52} className="dressy-intro-avatar" />
             <div>
               <p className="eyebrow" style={{ margin: 0 }}>OOTD · Meet Dressy</p>
-              <p className="dressy-hello">Hi, I&apos;m Dressy — your stylist.</p>
+              <p className="dressy-hello">Your personal stylist.</p>
             </div>
           </div>
           <h1>A full closet, and nothing to wear?</h1>

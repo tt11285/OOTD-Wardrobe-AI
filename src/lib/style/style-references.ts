@@ -1,7 +1,7 @@
 // ─── Aesthetic knowledge base (RAG corpus) ────────────────────────────────────
 // A curated set of styling cases. Each `description` is embedded (Gemini
 // text-embedding-004) and the closest cases to the user's occasion are injected
-// into the outfit-recommendation prompt as 参考案例 (reference cases).
+// into the outfit-recommendation prompt as reference cases.
 //
 // Text-only on purpose — no scraped images — to avoid copyright issues. This is
 // the V0 knowledge base; the PRD's pgvector path is the scale option for 200+.

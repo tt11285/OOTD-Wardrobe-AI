@@ -12,10 +12,10 @@ describe("Ofox Anthropic helpers", () => {
   });
 
   it("extracts JSON object from model text", () => {
-    const result = extractJsonObject('识别结果如下：{"items":[{"name":"黑色外套"}]}');
+    const result = extractJsonObject('Recognition result: {"items":[{"name":"Black coat"}]}');
 
     expect(result).toEqual({
-      items: [{ name: "黑色外套" }],
+      items: [{ name: "Black coat" }],
     });
   });
 });

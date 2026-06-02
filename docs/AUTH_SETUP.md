@@ -1,64 +1,74 @@
-# 登录功能配置指南（Supabase Magic Link）
+# Auth Setup (Supabase Magic Link)
 
-OOTD 使用 **邮箱 Magic Link（无密码）** 登录。代码已就绪，本文档是一次性的后台配置 + 测试步骤。
+OOTD uses passwordless **email magic-link** sign-in. The code is ready; this doc
+is the one-time dashboard config + test steps.
 
-> 未登录时 App 以匿名 `demo-user` 模式运行（完全可用），登录是叠加功能。
-
----
-
-## 1. Supabase 后台配置（约 3 分钟）
-
-项目：`https://fqyatogwykovaxorzazg.supabase.co`
-（`.env.local` 里的 `NEXT_PUBLIC_SUPABASE_URL / ANON_KEY / SERVICE_ROLE_KEY` 已配好，无需改代码。）
-
-### 1.1 打开项目
-1. 进 https://supabase.com/dashboard 登录
-2. 选 ref 为 `fqyatogwykovaxorzazg` 的项目
-
-### 1.2 确认邮箱登录已开启
-1. 左侧 **Authentication**（盾牌图标）
-2. **Sign In / Providers**（旧版 **Providers**）→ 打开 **Email**
-3. 确认 **Enable Email provider** 为开启
-4. **Confirm email** 保持默认即可（不影响 magic link）
-5. 改动后点 **Save**
-
-### 1.3 设置回跳地址（关键）
-1. **Authentication → URL Configuration**
-2. **Site URL** 填 `http://localhost:3000`
-3. **Redirect URLs** 点 **Add URL** 加入 `http://localhost:3000`（可再加通配 `http://localhost:3000/**`）
-4. **Save**
-
-> 登录代码的回跳地址 = 当前网址。Supabase 只放行白名单内地址，否则报 `redirect not allowed`。
-> 部署到线上后，把生产域名（如 `https://your-app.vercel.app`）同样加进 Site URL + Redirect URLs。
+> When signed out, the app runs in anonymous `demo-user` mode (fully usable).
+> Auth is additive.
 
 ---
 
-## 2. 测试登录（约 1 分钟）
+## 1. Supabase dashboard config (~3 min)
 
-前提：`npm run dev` 运行中（`http://localhost:3000`）。
+Your project's `NEXT_PUBLIC_SUPABASE_URL / ANON_KEY / SERVICE_ROLE_KEY` are set in
+`.env.local` — no code changes needed.
 
-1. 打开 `http://localhost:3000/login`（桌面右上 **Sign in** / 手机底部 **ACCOUNT**）
-2. 输入真实邮箱 → **Send magic link**
-3. 收信（发件人 Supabase；**没收到先翻垃圾箱**）
-4. **用同一浏览器**打开邮件里的链接 → 跳回首页、右上角显示邮箱 = 登录成功
-5. 登录后衣橱/搭配按你的账号归属（初始为空，与 demo 数据分开，正常）
-6. 登出：`/login` → **Sign out**
+### 1.1 Open the project
+1. Go to https://supabase.com/dashboard and sign in.
+2. Open your project.
+
+### 1.2 Enable email sign-in
+1. Left sidebar → **Authentication** (shield icon).
+2. **Sign In / Providers** (older UI: **Providers**) → open **Email**.
+3. Make sure **Enable Email provider** is on.
+4. **Confirm email** can stay at its default (doesn't affect magic links).
+5. **Save** if you changed anything.
+
+### 1.3 Set redirect URLs (important)
+1. **Authentication → URL Configuration**.
+2. **Site URL**: `http://localhost:3000`.
+3. **Redirect URLs**: **Add URL** → `http://localhost:3000` (optionally also the
+   wildcard `http://localhost:3000/**`).
+4. **Save**.
+
+> The login flow redirects back to the current origin. Supabase only allows
+> whitelisted addresses, otherwise you get `redirect not allowed`.
+> After deploying, add your production domain (e.g. `https://your-app.vercel.app`)
+> to both Site URL and Redirect URLs.
 
 ---
 
-## 3. 故障排查
+## 2. Test sign-in (~1 min)
 
-| 现象 | 解决 |
-|------|------|
-| `redirect ... not allowed` | 1.3 没配好——把 `http://localhost:3000` 加进 Redirect URLs 并 Save |
-| 收不到邮件 | 免费版邮件限流（每小时几封）且易进垃圾箱；等几分钟、翻垃圾箱；频繁测试会被限流 |
-| 点链接跳回但没登录 | 必须**同一浏览器**打开链接；别用手机点电脑发起的链接 |
-| 提示 "Auth isn't configured" | `.env.local` 缺 `NEXT_PUBLIC_SUPABASE_*`，补齐后**重启 dev 服务器** |
+Prereq: `npm run dev` is running (`http://localhost:3000`).
+
+1. Open `http://localhost:3000/login` (desktop top-right **Sign in** / mobile bottom **ACCOUNT**).
+2. Enter a real email → **Send magic link**.
+3. Check your inbox (sender: Supabase; **check spam if it's missing**).
+4. **Open the link in the same browser** → you return to the home page with your
+   email shown top-right = signed in.
+5. While signed in, your wardrobe/outfits belong to your account (empty at first,
+   separate from the demo data — that's expected).
+6. Sign out: `/login` → **Sign out**.
 
 ---
 
-## 4. 技术说明（实现方式）
+## 3. Troubleshooting
 
-- 浏览器端用 `@supabase/supabase-js` 客户端，session 存 localStorage，magic link 回跳的 token 自动识别（PKCE，`detectSessionInUrl`）。
-- 客户端请求通过 `authedFetch` 附带 access token；API 路由用 `getRequestUserId` 验证 token，按验证后的 `user.id` 归属数据。
-- **轻量隔离**：不依赖数据库 RLS。如需生产级隔离，再为各表加 RLS 策略（未来项）。
+| Symptom | Fix |
+|---------|-----|
+| `redirect ... not allowed` | Step 1.3 isn't done — add `http://localhost:3000` to Redirect URLs and Save |
+| No email arrives | Free-tier email is rate-limited (a few per hour) and lands in spam; wait, check spam, avoid rapid retries |
+| Link returns but not signed in | Open the link in the **same browser**; don't open a desktop-issued link on a phone |
+| "Auth isn't configured" | `.env.local` is missing `NEXT_PUBLIC_SUPABASE_*`; add them and **restart the dev server** |
+
+---
+
+## 4. How it works
+
+- Browser uses the `@supabase/supabase-js` client; the session lives in
+  localStorage and the magic-link token is auto-detected (PKCE, `detectSessionInUrl`).
+- Client requests attach the access token via `authedFetch`; API routes verify it
+  with `getRequestUserId` and key data on the verified `user.id`.
+- **Lightweight isolation**: no database RLS. For production-grade isolation, add
+  RLS policies per table (future work).

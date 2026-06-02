@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   const item = createDemoItem({
     userId,
     imageUrl,
-    name: String(body.name || "未命名单品"),
+    name: String(body.name || "Unnamed item"),
     brand: typeof body.brand === "string" ? body.brand.trim() : "",
     material: typeof body.material === "string" ? body.material.trim() : "",
     category,

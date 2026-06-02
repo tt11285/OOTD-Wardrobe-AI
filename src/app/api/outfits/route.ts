@@ -7,7 +7,7 @@ import { getRequestUserId } from "@/lib/supabase/request-user";
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const userId = await getRequestUserId(request, String(body.userId || "server-demo-user"));
-  const occasion = String(body.occasion || "通勤");
+  const occasion = String(body.occasion || "Commute");
   const items = await repository.listItems(userId);
   const readiness = getWardrobeReadiness(items);
 

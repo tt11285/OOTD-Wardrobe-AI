@@ -43,7 +43,7 @@ describe("outfit domain", () => {
 
 describe("occasion domain", () => {
   it("maps interview to high formality", () => {
-    expect(occasionHint("面试").formality).toBe(4);
+    expect(occasionHint("Interview").formality).toBe(4);
   });
 
   it("maps English occasion labels too", () => {

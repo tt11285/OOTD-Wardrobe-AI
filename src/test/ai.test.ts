@@ -23,7 +23,7 @@ describe("AI model router", () => {
       item("shoes-1", "shoes"),
     ];
 
-    const outfits = await generateDemoOutfits(items, "面试");
+    const outfits = await generateDemoOutfits(items, "Interview");
 
     expect(outfits).toHaveLength(2);
     expect(outfits.every((outfit) => outfit.selectedItems.every((id) => items.some((item) => item.id === id)))).toBe(
@@ -41,9 +41,9 @@ function item(id: string, category: StoredClothingItem["category"]): StoredCloth
     name: id,
     brand: "",
     material: "",
-    colors: ["黑色"],
-    styleTags: ["简约"],
-    season: ["春"],
+    colors: ["black"],
+    styleTags: ["minimal"],
+    season: ["spring"],
     formality: 3,
     confidence: 0.9,
     manuallyEdited: false,

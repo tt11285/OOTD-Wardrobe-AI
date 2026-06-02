@@ -29,10 +29,10 @@ describe("keyword retrieval (fallback path)", () => {
     expect(top[0].occasionTags).toContain("interview");
   });
 
-  it("matches Chinese occasions too", () => {
-    const top = rankStyleReferencesByKeyword("周末逛街", 3);
+  it("matches by occasion keyword", () => {
+    const top = rankStyleReferencesByKeyword("commute", 3);
     expect(top.length).toBe(3);
-    expect(top.some((r) => r.occasionTags.includes("周末"))).toBe(true);
+    expect(top.some((r) => r.occasionTags.includes("commute"))).toBe(true);
   });
 
   it("still returns k cases when nothing matches (principle backfill)", () => {

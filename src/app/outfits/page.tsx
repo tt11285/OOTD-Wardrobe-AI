@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/empty-state";
 import { OutfitCard } from "@/components/outfit-card";
 import { ShareCard } from "@/components/share-card";
 import { DressyAvatar } from "@/components/dressy-avatar";
+import { DressyChat } from "@/components/dressy-chat";
 import { occasionTags } from "@/lib/domain/occasion";
 import { categoryLabel } from "@/lib/domain/outfits";
 import { useAuth } from "@/lib/state/user";
@@ -183,6 +184,19 @@ export default function OutfitsPage() {
       ) : null}
 
       {sharing ? <ShareCard outfit={sharing} items={items} onClose={() => setSharing(null)} /> : null}
+
+      {outfits.length && !isLoading ? (
+        <DressyChat
+          userId={userId}
+          occasion={occasion}
+          onOutfits={(revised) => {
+            setOutfits(revised);
+            setAcceptedId(null);
+            setActiveIdx(0);
+            setMessage("Dressy restyled your looks — swipe to browse.");
+          }}
+        />
+      ) : null}
 
       <BottomNav />
     </main>

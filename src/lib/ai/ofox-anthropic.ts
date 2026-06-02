@@ -333,19 +333,34 @@ export async function recommendOutfitsWithOfoxAnthropic(
     throw new Error("Ofox outfit response did not include text content.");
   }
 
-  const parsed = extractJsonObject(text) as { outfits?: RawOutfit[] };
+  return parseOutfitsFromText(text, items, occasion, userId, model, hint.style);
+}
+
+// Shared parser: turn a model's {"outfits":[…]} JSON text into validated
+// OutfitCandidate[] referencing only real wardrobe ids (used by both the
+// recommendation and the chat flows).
+function parseOutfitsFromText(
+  text: string,
+  items: StoredClothingItem[],
+  occasion: string,
+  userId: string,
+  model: string,
+  fallbackStyle: string,
+): OutfitCandidate[] {
+  let parsed: { outfits?: RawOutfit[] };
+  try {
+    parsed = extractJsonObject(text) as { outfits?: RawOutfit[] };
+  } catch {
+    return [];
+  }
   const rawOutfits = Array.isArray(parsed.outfits) ? parsed.outfits : [];
   const itemsById = new Map(items.map((it) => [it.id, it]));
-  const modelLabel = model;
   const timestamp = nowIso();
-
   const candidates: OutfitCandidate[] = [];
 
   rawOutfits.forEach((raw, index) => {
     const kind: "wardrobe" | "aspirational" = raw.kind === "aspirational" ? "aspirational" : "wardrobe";
 
-    // Build the pieces list — prefer the structured `pieces`, fall back to the
-    // legacy selected_items (all owned).
     let pieces: OutfitPiece[] = [];
     if (Array.isArray(raw.pieces) && raw.pieces.length) {
       pieces = (raw.pieces as RawPiece[]).map((p) => {
@@ -371,9 +386,6 @@ export async function recommendOutfitsWithOfoxAnthropic(
     }
 
     const ownedIds = pieces.filter((p) => p.owned && p.itemId).map((p) => p.itemId as string);
-
-    // A wardrobe look must be wearable from the closet (>= 2 owned pieces).
-    // An aspirational look just needs some pieces (owned or suggested).
     if (kind === "wardrobe" && ownedIds.length < 2) return;
     if (pieces.length < 2) return;
 
@@ -385,7 +397,7 @@ export async function recommendOutfitsWithOfoxAnthropic(
       pieces,
       selectedItems: ownedIds,
       reason: typeof raw.reason === "string" && raw.reason.trim() ? raw.reason.trim() : "A look picked for the occasion.",
-      style: typeof raw.style === "string" && raw.style.trim() ? raw.style.trim() : hint.style,
+      style: typeof raw.style === "string" && raw.style.trim() ? raw.style.trim() : fallbackStyle,
       colorLogic:
         typeof raw.color_logic === "string" && raw.color_logic.trim()
           ? raw.color_logic.trim()
@@ -394,10 +406,87 @@ export async function recommendOutfitsWithOfoxAnthropic(
             : "Kept within three colors with a clear focus.",
       userAction: "pending",
       rank: index + 1,
-      modelUsed: modelLabel,
+      modelUsed: model,
       createdAt: timestamp,
     });
   });
 
   return candidates;
+}
+
+// ─── Dressy chat ─────────────────────────────────────────────────────────────
+
+export type ChatTurn = { role: "user" | "assistant"; content: string };
+
+/**
+ * Conversational restyle: the user gives feedback ("more casual", "swap the
+ * shoes", "no jacket") and Dressy replies AND returns revised outfits. Returns
+ * { reply, outfits }. outfits may be empty (chat-only reply).
+ */
+export async function chatWithDressy(
+  message: string,
+  history: ChatTurn[],
+  items: StoredClothingItem[],
+  occasion: string,
+  userId: string,
+): Promise<{ reply: string; outfits: OutfitCandidate[] }> {
+  const apiKey = process.env.OFOX_API_KEY;
+  const url = process.env.OFOX_ANTHROPIC_MESSAGES_URL || "https://api.ofox.ai/anthropic/v1/messages";
+  const model = process.env.OOTD_RECOMMENDATION_MODEL || process.env.OOTD_RECOGNITION_MODEL || "anthropic/claude-sonnet-4.5";
+  if (!apiKey) throw new Error("Missing OFOX_API_KEY.");
+
+  const hint = occasionHint(occasion);
+  const wardrobeSummary = items.map((item) => ({
+    id: item.id,
+    name: item.name,
+    category: item.category,
+    colors: item.colors,
+    style_tags: item.styleTags,
+    formality: item.formality,
+  }));
+
+  const system = [
+    "You are Dressy, a warm, sharp personal stylist chatting with the user about their outfits.",
+    "The user just got some looks for this occasion and may ask to tweak them (more casual, swap a piece, change colors, no jacket, dressier, etc.).",
+    "Reply in 1-3 friendly sentences as Dressy, then provide revised outfits.",
+    "",
+    `Occasion: ${occasion} (target formality ~${hint.formality}).`,
+    "The user's REAL wardrobe (each piece has an id):",
+    JSON.stringify(wardrobeSummary, null, 2),
+    "",
+    "ALWAYS reply with STRICT JSON only (no Markdown), shape:",
+    '{"reply":"Dressy\'s message","outfits":[{"kind":"wardrobe","style":"...","reason":"...","color_logic":"...","pieces":[{"id":"<wardrobe id>","name":"...","category":"top","colors":["..."],"owned":true}]}]}',
+    "Rules: prefer the user's real pieces (owned:true with real id). If you suggest something they don't own, set owned:false and omit id and mark the outfit kind:\"aspirational\". 1-3 outfits, each with >=1 top, bottom, shoes. If the user only chats (no restyle needed), return an empty outfits array.",
+    "All text in English.",
+  ].join("\n");
+
+  const messages = [
+    ...history.slice(-6).map((t) => ({ role: t.role, content: [{ type: "text", text: t.content }] })),
+    { role: "user" as const, content: [{ type: "text", text: message }] },
+  ];
+
+  const response = await fetch(url, {
+    method: "POST",
+    signal: AbortSignal.timeout(60000),
+    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
+    body: JSON.stringify({ model, max_tokens: 1800, temperature: 0.5, system, messages }),
+  });
+
+  if (!response.ok) {
+    const errBody = await response.text();
+    throw new Error(`Ofox chat failed: ${response.status} ${errBody.slice(0, 200)}`);
+  }
+
+  const payload = (await response.json()) as AnthropicResponse;
+  const text = payload.content?.find((b) => b.type === "text")?.text ?? "";
+
+  let reply = "";
+  try {
+    const obj = extractJsonObject(text) as { reply?: unknown };
+    if (typeof obj.reply === "string") reply = obj.reply.trim();
+  } catch {
+    reply = text.trim();
+  }
+  const outfits = parseOutfitsFromText(text, items, occasion, userId, model, hint.style);
+  return { reply: reply || "Here's an updated take for you.", outfits };
 }

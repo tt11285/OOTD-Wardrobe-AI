@@ -36,3 +36,9 @@ yarn-error.log*
 .cache/
 .turbo/
 coverage/
+
+# Build info
+tsconfig.tsbuildinfo
+
+# Local agent/tooling
+.claude/

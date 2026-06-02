@@ -150,6 +150,13 @@ export function getCuratedOutfits(occasion: string, items: StoredClothingItem[])
   const timestamp = nowIso();
   const outfits: OutfitCandidate[] = [];
 
+  // Pre-generated full-body look images live at a deterministic public path
+  // (see scripts/generate-look-images.mjs). key e.g. "Commute" → commute.
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const slug = key.toLowerCase();
+  const lookUrl = (i: number) =>
+    base ? `${base}/storage/v1/object/public/wardrobe-images/looks/${slug}-${i + 1}.png` : undefined;
+
   looks.forEach((look, index) => {
     const resolved = look.pieces
       .map((name) => byName.get(name.toLowerCase()))
@@ -176,6 +183,7 @@ export function getCuratedOutfits(occasion: string, items: StoredClothingItem[])
       reason: look.reason,
       style: look.style,
       colorLogic: look.colorLogic,
+      lookImageUrl: lookUrl(index),
       userAction: "pending",
       rank: index + 1,
       modelUsed: "curated",

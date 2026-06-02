@@ -32,6 +32,7 @@ export function OutfitCard({
   recommended?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [zoom, setZoom] = useState<RenderPiece | null>(null);
   const aspirational = outfit.kind === "aspirational";
 
   const basePieces: OutfitPiece[] = outfit.pieces?.length
@@ -46,46 +47,78 @@ export function OutfitCard({
     return { ...p, imageUrl: real?.imageUrl };
   });
 
+  const hasLook = hasRealImage(outfit.lookImageUrl);
+
   return (
     <article
       className={`outfit-card${accepted ? " is-accepted" : ""}${recommended ? " is-recommended" : ""}${aspirational ? " is-aspirational" : ""}`}
     >
-      <div className="outfit-collage" data-count={pieces.length}>
-        {recommended ? (
-          <span className="outfit-ribbon">★ Top pick</span>
-        ) : aspirational ? (
-          <span className="outfit-ribbon outfit-ribbon--goal">Styling goal</span>
-        ) : null}
-        {pieces.map((piece, i) => (
-          <div className={`outfit-tile${piece.owned ? "" : " outfit-tile--suggested"}`} key={piece.itemId ?? `${piece.name}-${i}`}>
-            {piece.owned && hasRealImage(piece.imageUrl) ? (
-              <img alt={piece.name} src={piece.imageUrl} />
-            ) : (
-              <div className="outfit-tile-fallback">
-                {!piece.owned ? <span className="suggested-tag">Suggested</span> : null}
-                <small>{piece.name}</small>
-              </div>
-            )}
-            <span className="outfit-tile-label">{categoryLabel(piece.category)}</span>
-          </div>
-        ))}
-      </div>
+      {/* Hero — full-body model wearing the look (falls back to collage) */}
+      {hasLook ? (
+        <div className="outfit-look">
+          {recommended ? (
+            <span className="outfit-ribbon">★ Top pick</span>
+          ) : aspirational ? (
+            <span className="outfit-ribbon outfit-ribbon--goal">Styling goal</span>
+          ) : null}
+          <img className="outfit-look-img" alt={`Model wearing ${outfit.style}`} src={outfit.lookImageUrl} />
+        </div>
+      ) : (
+        <div className="outfit-collage" data-count={pieces.length}>
+          {recommended ? (
+            <span className="outfit-ribbon">★ Top pick</span>
+          ) : aspirational ? (
+            <span className="outfit-ribbon outfit-ribbon--goal">Styling goal</span>
+          ) : null}
+          {pieces.map((piece, i) => (
+            <div className={`outfit-tile${piece.owned ? "" : " outfit-tile--suggested"}`} key={piece.itemId ?? `${piece.name}-${i}`}>
+              {piece.owned && hasRealImage(piece.imageUrl) ? (
+                <img alt={piece.name} src={piece.imageUrl} />
+              ) : (
+                <div className="outfit-tile-fallback">
+                  {!piece.owned ? <span className="suggested-tag">Suggested</span> : null}
+                  <small>{piece.name}</small>
+                </div>
+              )}
+              <span className="outfit-tile-label">{categoryLabel(piece.category)}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="outfit-body">
         <p className="outfit-style">{outfit.style}</p>
         <p className="outfit-reason">{outfit.reason}</p>
 
-        <ul className="outfit-items">
+        {/* Pieces — thumbnail strip; hover/focus to enlarge */}
+        <div className="outfit-thumbs" role="list">
           {pieces.map((piece, i) => (
-            <li key={piece.itemId ?? `${piece.name}-${i}`}>
-              <span className="outfit-item-cat">{categoryLabel(piece.category)}</span>
-              <span className="outfit-item-name">
-                {piece.name}
-                {!piece.owned ? <em className="suggested-inline"> · suggested</em> : null}
-              </span>
-            </li>
+            <div
+              role="listitem"
+              className={`outfit-thumb${piece.owned ? "" : " outfit-thumb--suggested"}`}
+              key={piece.itemId ?? `${piece.name}-${i}`}
+              onMouseEnter={() => piece.owned && hasRealImage(piece.imageUrl) && setZoom(piece)}
+              onMouseLeave={() => setZoom(null)}
+              tabIndex={0}
+              onFocus={() => piece.owned && hasRealImage(piece.imageUrl) && setZoom(piece)}
+              onBlur={() => setZoom(null)}
+              aria-label={`${categoryLabel(piece.category)}: ${piece.name}`}
+            >
+              {piece.owned && hasRealImage(piece.imageUrl) ? (
+                <img alt={piece.name} src={piece.imageUrl} />
+              ) : (
+                <span className="outfit-thumb-ph">{piece.owned ? piece.name.slice(0, 2) : "+"}</span>
+              )}
+
+              {zoom && (zoom.itemId ?? zoom.name) === (piece.itemId ?? piece.name) ? (
+                <div className="outfit-zoom" role="tooltip">
+                  <img alt={piece.name} src={piece.imageUrl} />
+                  <span className="outfit-zoom-name">{piece.name}</span>
+                </div>
+              ) : null}
+            </div>
           ))}
-        </ul>
+        </div>
 
         <button className="outfit-why" type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)}>
           Why this look
@@ -101,11 +134,8 @@ export function OutfitCard({
               {outfit.colorLogic}
             </p>
             <p>
-              <strong>Style</strong>
-              {outfit.style}
-              {aspirational
-                ? " · an aspirational look — some pieces aren't in your wardrobe yet."
-                : " · formality matched to the occasion, every piece from your own wardrobe."}
+              <strong>Pieces</strong>
+              {pieces.map((p) => p.name).join(", ")}
             </p>
           </div>
         ) : null}

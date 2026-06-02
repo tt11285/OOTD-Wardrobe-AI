@@ -60,6 +60,8 @@ export type OutfitCandidate = {
   // from the user's closet; "aspirational" looks may include suggested pieces.
   kind?: "wardrobe" | "aspirational";
   pieces?: OutfitPiece[];
+  // Optional pre-generated full-body model image (curated demo looks only).
+  lookImageUrl?: string;
 };
 
 type ItemPatch = Partial<

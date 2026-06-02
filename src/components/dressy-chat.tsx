@@ -24,7 +24,7 @@ export function DressyChat({
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "assistant", content: "Want to tweak these looks? Tell me what you'd change and I'll restyle." },
+    { role: "assistant", content: "Hi, I'm Dressy. Tell me the vibe or what to tweak, and I'll style a look from your wardrobe." },
   ]);
   const listRef = useRef<HTMLDivElement>(null);
 

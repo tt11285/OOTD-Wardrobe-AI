@@ -2341,17 +2341,41 @@ h1 {
 .outfit-share:hover { color: var(--accent-strong); }
 
 /* ═══ Dressy avatar placements ═══════════════════════════════════════════════ */
+.dressy-avatar {
+  display: inline-flex;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: var(--r-full);
+  background: #f1e9df;
+  border: 1.5px solid var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.dressy-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+.dressy-avatar-fallback {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fffcf9;
+  font-family: var(--font-serif);
+  font-size: 0.5em;
+  font-weight: 600;
+}
+
 .dressy-intro {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 18px;
 }
-.dressy-intro-avatar {
-  flex: 0 0 auto;
-  border-radius: var(--r-full);
-  box-shadow: var(--shadow-xs);
-}
+.dressy-intro-avatar { flex: 0 0 auto; }
 .dressy-hello {
   margin: 2px 0 0;
   font-family: var(--font-serif);
@@ -2382,8 +2406,8 @@ h1 {
 .dressy-working .outfit-skeleton { width: 100%; margin-top: 4px; }
 
 @keyframes dressy-bob {
-  0%, 100% { transform: translateY(0) rotate(-2deg); }
-  50% { transform: translateY(-5px) rotate(2deg); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .dressy-working-avatar { animation: none; }

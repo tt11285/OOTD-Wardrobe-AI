@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/bottom-nav";
 import { EmptyState } from "@/components/empty-state";
 import { OutfitCard } from "@/components/outfit-card";
 import { ShareCard } from "@/components/share-card";
+import { DressyAvatar } from "@/components/dressy-avatar";
 import { occasionTags } from "@/lib/domain/occasion";
 import { categoryLabel } from "@/lib/domain/outfits";
 import { useAuth } from "@/lib/state/user";
@@ -136,7 +137,13 @@ export default function OutfitsPage() {
         {message ? <p className="status-text">{message}</p> : null}
       </section>
 
-      {isLoading ? <div className="skeleton outfit-skeleton" aria-hidden="true" /> : null}
+      {isLoading ? (
+        <div className="dressy-working" role="status">
+          <DressyAvatar variant="portrait" size={44} className="dressy-working-avatar" />
+          <span>{loadingPhrases[phraseIdx]}</span>
+          <div className="skeleton outfit-skeleton" aria-hidden="true" />
+        </div>
+      ) : null}
 
       {!isLoading && outfits.length ? (
         <section className="outfit-result">

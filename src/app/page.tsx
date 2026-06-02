@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { DressyAvatar } from "@/components/dressy-avatar";
 import type { StoredClothingItem } from "@/lib/storage/repository";
 
 type TabKey = "OOTD" | "ADD" | "WARDROBE" | "OUTFITS";
@@ -83,7 +84,13 @@ export default function HomePage() {
       <div className="landing-inner">
         {/* ── Left: hero ──────────────────────────────── */}
         <section className="landing-hero">
-          <p className="eyebrow">OOTD · Meet Dressy</p>
+          <div className="dressy-intro">
+            <DressyAvatar variant="portrait" size={52} className="dressy-intro-avatar" />
+            <div>
+              <p className="eyebrow" style={{ margin: 0 }}>OOTD · Meet Dressy</p>
+              <p className="dressy-hello">Hi, I&apos;m Dressy — your stylist.</p>
+            </div>
+          </div>
           <h1>A full closet, and nothing to wear?</h1>
           <p className="hero-copy">
             Meet Dressy — the stylist who memorises your wardrobe. Snap your clothes once, then

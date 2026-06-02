@@ -2339,3 +2339,52 @@ h1 {
   cursor: pointer;
 }
 .outfit-share:hover { color: var(--accent-strong); }
+
+/* ═══ Dressy avatar placements ═══════════════════════════════════════════════ */
+.dressy-intro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.dressy-intro-avatar {
+  flex: 0 0 auto;
+  border-radius: var(--r-full);
+  box-shadow: var(--shadow-xs);
+}
+.dressy-hello {
+  margin: 2px 0 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--espresso);
+}
+
+/* Outfits — Dressy working state */
+.dressy-working {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin-top: 22px;
+  text-align: center;
+}
+.dressy-working > span {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--espresso);
+}
+.dressy-working-avatar {
+  border-radius: var(--r-full);
+  box-shadow: var(--shadow-sm);
+  animation: dressy-bob 1.6s ease-in-out infinite;
+}
+.dressy-working .outfit-skeleton { width: 100%; margin-top: 4px; }
+
+@keyframes dressy-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-5px) rotate(2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dressy-working-avatar { animation: none; }
+}

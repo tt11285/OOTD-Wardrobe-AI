@@ -32,6 +32,10 @@ export function DressyChat({
   const [pos, setPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const drag = useRef<{ sx: number; sy: number; ox: number; oy: number; moved: boolean } | null>(null);
 
+  // Draggable panel position (offset from its default top-right anchor).
+  const [panelPos, setPanelPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const panelDrag = useRef<{ sx: number; sy: number; ox: number; oy: number } | null>(null);
+
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, open]);
@@ -53,7 +57,28 @@ export function DressyChat({
     drag.current = null;
     (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
     // Treat as a click (toggle) only if the pointer barely moved.
-    if (d && !d.moved) setOpen((v) => !v);
+    if (d && !d.moved) {
+      // Reset panel position each time it opens so it lands in its default spot.
+      if (!open) setPanelPos({ x: 0, y: 0 });
+      setOpen((v) => !v);
+    }
+  }
+
+  // Drag the whole panel by its header.
+  function onPanelDown(e: React.PointerEvent) {
+    // Don't start a drag from the close button.
+    if ((e.target as HTMLElement).closest(".dressy-panel-close")) return;
+    panelDrag.current = { sx: e.clientX, sy: e.clientY, ox: panelPos.x, oy: panelPos.y };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }
+  function onPanelMove(e: React.PointerEvent) {
+    const d = panelDrag.current;
+    if (!d) return;
+    setPanelPos({ x: d.ox + (e.clientX - d.sx), y: d.oy + (e.clientY - d.sy) });
+  }
+  function onPanelUp(e: React.PointerEvent) {
+    panelDrag.current = null;
+    (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
   }
 
   async function send(text: string) {
@@ -95,8 +120,19 @@ export function DressyChat({
       </button>
 
       {open ? (
-        <div className="dressy-panel" role="dialog" aria-label="Chat with Dressy">
-          <div className="dressy-panel-head">
+        <div
+          className="dressy-panel"
+          role="dialog"
+          aria-label="Chat with Dressy"
+          style={{ transform: `translate(${panelPos.x}px, ${panelPos.y}px)` }}
+        >
+          <div
+            className="dressy-panel-head"
+            onPointerDown={onPanelDown}
+            onPointerMove={onPanelMove}
+            onPointerUp={onPanelUp}
+            title="Drag to move"
+          >
             <DressyAvatar size={32} />
             <div>
               <strong>Dressy</strong>

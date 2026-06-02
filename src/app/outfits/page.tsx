@@ -26,12 +26,14 @@ export default function OutfitsPage() {
   const [acceptedId, setAcceptedId] = useState<string | null>(null);
   const [activeIdx, setActiveIdx] = useState(0);
   const [sharing, setSharing] = useState<OutfitCandidate | null>(null);
+  const [itemsLoaded, setItemsLoaded] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     authedFetch(`/api/items?userId=${encodeURIComponent(userId)}`)
       .then((response) => response.json())
-      .then((data) => setItems(data.items ?? []));
+      .then((data) => setItems(data.items ?? []))
+      .finally(() => setItemsLoaded(true));
   }, [userId]);
 
   // Cycle the "AI is working" copy so loading feels alive, not a dead spinner.
@@ -179,7 +181,7 @@ export default function OutfitsPage() {
             </div>
           ) : null}
         </section>
-      ) : !isLoading && !items.length ? (
+      ) : itemsLoaded && !isLoading && !items.length ? (
         <EmptyState title="Dressy needs a little more to work with" copy="Add at least a top, a bottom and a pair of shoes, and she'll style a full look for you." />
       ) : null}
 

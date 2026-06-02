@@ -28,9 +28,33 @@ export function DressyChat({
   ]);
   const listRef = useRef<HTMLDivElement>(null);
 
+  // Draggable FAB position (offset from its default bottom-right anchor).
+  const [pos, setPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const drag = useRef<{ sx: number; sy: number; ox: number; oy: number; moved: boolean } | null>(null);
+
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, open]);
+
+  function onPointerDown(e: React.PointerEvent) {
+    drag.current = { sx: e.clientX, sy: e.clientY, ox: pos.x, oy: pos.y, moved: false };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }
+  function onPointerMove(e: React.PointerEvent) {
+    const d = drag.current;
+    if (!d) return;
+    const dx = e.clientX - d.sx;
+    const dy = e.clientY - d.sy;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) d.moved = true;
+    setPos({ x: d.ox + dx, y: d.oy + dy });
+  }
+  function onPointerUp(e: React.PointerEvent) {
+    const d = drag.current;
+    drag.current = null;
+    (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
+    // Treat as a click (toggle) only if the pointer barely moved.
+    if (d && !d.moved) setOpen((v) => !v);
+  }
 
   async function send(text: string) {
     const msg = text.trim();
@@ -59,8 +83,12 @@ export function DressyChat({
       <button
         type="button"
         className={`dressy-fab${open ? " is-open" : ""}`}
-        onClick={() => setOpen((v) => !v)}
+        style={{ transform: `translate(${pos.x}px, ${pos.y}px)` }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
         aria-label={open ? "Close chat with Dressy" : "Chat with Dressy"}
+        title="Drag to move · tap to chat"
       >
         <DressyAvatar size={56} />
         {!open ? <span className="dressy-fab-hint">Ask Dressy</span> : null}

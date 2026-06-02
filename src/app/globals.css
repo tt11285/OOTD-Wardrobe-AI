@@ -2422,15 +2422,25 @@ h1 {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 5px 5px 5px 5px;
+  padding: 5px;
   border: none;
   border-radius: var(--r-full);
+  background: rgba(255, 252, 249, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--shadow);
+  cursor: grab;
+  opacity: 0.72;
+  touch-action: none;
+  transition: opacity 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.dressy-fab:hover,
+.dressy-fab:focus-visible {
+  opacity: 1;
   background: var(--surface);
   box-shadow: var(--shadow-lg);
-  cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
-.dressy-fab:hover { transform: translateY(-2px); }
+.dressy-fab:active { cursor: grabbing; }
 .dressy-fab .dressy-avatar { box-shadow: none; }
 .dressy-fab-hint {
   padding-right: 14px;

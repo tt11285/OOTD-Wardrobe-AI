@@ -194,6 +194,23 @@ export default function OutfitsPage() {
             setAcceptedId(null);
             setActiveIdx(0);
             setMessage("Dressy restyled your looks — swipe to browse.");
+            // Generate a full-body image per restyled look in the background,
+            // patching each card as its image arrives. Best-effort.
+            revised.forEach((o) => {
+              if (o.lookImageUrl) return;
+              authedFetch("/api/look-image", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ lookId: o.id, pieces: o.pieces ?? [] }),
+              })
+                .then((r) => r.json())
+                .then((d) => {
+                  if (d.url) {
+                    setOutfits((prev) => prev.map((x) => (x.id === o.id ? { ...x, lookImageUrl: d.url } : x)));
+                  }
+                })
+                .catch(() => {});
+            });
           }}
         />
       ) : null}

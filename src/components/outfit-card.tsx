@@ -3,16 +3,8 @@
 import { useState } from "react";
 import type { OutfitCandidate, OutfitPiece, StoredClothingItem } from "@/lib/storage/repository";
 import { categoryLabel } from "@/lib/domain/outfits";
-
-function hasRealImage(url: string | undefined): boolean {
-  if (!url) return false;
-  if (url.startsWith("http")) return true;
-  if (url.startsWith("data:")) {
-    const b64 = url.split(",")[1] ?? "";
-    return b64.length > 300;
-  }
-  return false;
-}
+import { isDisplayableImage } from "@/lib/domain/image";
+import { SafeImage } from "@/components/safe-image";
 
 type RenderPiece = OutfitPiece & { imageUrl?: string };
 
@@ -33,6 +25,7 @@ export function OutfitCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const [zoom, setZoom] = useState<RenderPiece | null>(null);
+  const [failedLookSrc, setFailedLookSrc] = useState<string>();
   const aspirational = outfit.kind === "aspirational";
 
   const basePieces: OutfitPiece[] = outfit.pieces?.length
@@ -47,44 +40,50 @@ export function OutfitCard({
     return { ...p, imageUrl: real?.imageUrl };
   });
 
-  const hasLook = hasRealImage(outfit.lookImageUrl);
+  const ribbon = recommended ? (
+    <span className="outfit-ribbon">★ Top pick</span>
+  ) : aspirational ? (
+    <span className="outfit-ribbon outfit-ribbon--goal">Styling goal</span>
+  ) : null;
+
+  const collage = (
+    <div className="outfit-collage" data-count={pieces.length}>
+      {ribbon}
+      {pieces.map((piece, i) => (
+        <div className={`outfit-tile${piece.owned ? "" : " outfit-tile--suggested"}`} key={piece.itemId ?? `${piece.name}-${i}`}>
+          <SafeImage
+            alt={piece.name}
+            src={piece.owned ? piece.imageUrl : undefined}
+            fallback={
+              <div className="outfit-tile-fallback">
+                {!piece.owned ? <span className="suggested-tag">Suggested</span> : null}
+                <small>{piece.name}</small>
+              </div>
+            }
+          />
+          <span className="outfit-tile-label">{categoryLabel(piece.category)}</span>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <article
       className={`outfit-card${accepted ? " is-accepted" : ""}${recommended ? " is-recommended" : ""}${aspirational ? " is-aspirational" : ""}`}
     >
       {/* Hero — full-body model wearing the look (falls back to collage) */}
-      {hasLook ? (
+      {isDisplayableImage(outfit.lookImageUrl) && outfit.lookImageUrl !== failedLookSrc ? (
         <div className="outfit-look">
-          {recommended ? (
-            <span className="outfit-ribbon">★ Top pick</span>
-          ) : aspirational ? (
-            <span className="outfit-ribbon outfit-ribbon--goal">Styling goal</span>
-          ) : null}
-          <img className="outfit-look-img" alt={`Model wearing ${outfit.style}`} src={outfit.lookImageUrl} />
+          {ribbon}
+          <SafeImage
+            className="outfit-look-img"
+            alt={`Model wearing ${outfit.style}`}
+            src={outfit.lookImageUrl}
+            onError={() => setFailedLookSrc(outfit.lookImageUrl)}
+            fallback={null}
+          />
         </div>
-      ) : (
-        <div className="outfit-collage" data-count={pieces.length}>
-          {recommended ? (
-            <span className="outfit-ribbon">★ Top pick</span>
-          ) : aspirational ? (
-            <span className="outfit-ribbon outfit-ribbon--goal">Styling goal</span>
-          ) : null}
-          {pieces.map((piece, i) => (
-            <div className={`outfit-tile${piece.owned ? "" : " outfit-tile--suggested"}`} key={piece.itemId ?? `${piece.name}-${i}`}>
-              {piece.owned && hasRealImage(piece.imageUrl) ? (
-                <img alt={piece.name} src={piece.imageUrl} />
-              ) : (
-                <div className="outfit-tile-fallback">
-                  {!piece.owned ? <span className="suggested-tag">Suggested</span> : null}
-                  <small>{piece.name}</small>
-                </div>
-              )}
-              <span className="outfit-tile-label">{categoryLabel(piece.category)}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      ) : collage}
 
       <div className="outfit-body">
         <p className="outfit-style">{outfit.style}</p>
@@ -97,22 +96,22 @@ export function OutfitCard({
               role="listitem"
               className={`outfit-thumb${piece.owned ? "" : " outfit-thumb--suggested"}`}
               key={piece.itemId ?? `${piece.name}-${i}`}
-              onMouseEnter={() => piece.owned && hasRealImage(piece.imageUrl) && setZoom(piece)}
+              onMouseEnter={() => piece.owned && isDisplayableImage(piece.imageUrl) && setZoom(piece)}
               onMouseLeave={() => setZoom(null)}
               tabIndex={0}
-              onFocus={() => piece.owned && hasRealImage(piece.imageUrl) && setZoom(piece)}
+              onFocus={() => piece.owned && isDisplayableImage(piece.imageUrl) && setZoom(piece)}
               onBlur={() => setZoom(null)}
               aria-label={`${categoryLabel(piece.category)}: ${piece.name}`}
             >
-              {piece.owned && hasRealImage(piece.imageUrl) ? (
-                <img alt={piece.name} src={piece.imageUrl} />
-              ) : (
-                <span className="outfit-thumb-ph">{piece.owned ? piece.name.slice(0, 2) : "+"}</span>
-              )}
+              <SafeImage
+                alt={piece.name}
+                src={piece.owned ? piece.imageUrl : undefined}
+                fallback={<span className="outfit-thumb-ph">{piece.owned ? piece.name.slice(0, 2) : "+"}</span>}
+              />
 
               {zoom && (zoom.itemId ?? zoom.name) === (piece.itemId ?? piece.name) ? (
                 <div className="outfit-zoom" role="tooltip">
-                  <img alt={piece.name} src={piece.imageUrl} />
+                  <SafeImage alt={piece.name} src={piece.imageUrl} fallback={<span className="outfit-thumb-ph">No image</span>} />
                   <span className="outfit-zoom-name">{piece.name}</span>
                 </div>
               ) : null}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { StoredClothingItem } from "@/lib/storage/repository";
+import { SafeImage } from "@/components/safe-image";
 
 // Standalone design preview for the "Editorial Atelier" direction (Phase 1).
 // Everything is scoped under `.atelier`, so it does NOT change the live app.
@@ -103,7 +104,7 @@ export default function StylePreviewPage() {
             {cards.map((it, i) => (
               <article className="at-card at-rise" key={it.id} style={{ animationDelay: `${260 + i * 50}ms` }}>
                 <div className="at-card-img">
-                  {it.imageUrl?.startsWith("http") ? <img src={it.imageUrl} alt={it.name} /> : <div className="at-card-ph" />}
+                  <SafeImage src={it.imageUrl} alt={it.name} fallback={<div className="at-card-ph" />} />
                 </div>
                 <div className="at-card-body">
                   <p className="at-card-name">{it.name}</p>
@@ -123,7 +124,7 @@ export default function StylePreviewPage() {
             <div className="at-look-collage" data-count={look.length}>
               {look.map((it) => (
                 <div className="at-look-tile" key={it.id}>
-                  {it.imageUrl?.startsWith("http") ? <img src={it.imageUrl} alt={it.name} /> : <div className="at-card-ph" />}
+                  <SafeImage src={it.imageUrl} alt={it.name} fallback={<div className="at-card-ph" />} />
                   <span className="at-look-label">{it.category}</span>
                 </div>
               ))}

@@ -1,11 +1,4 @@
-// Dressy — the stylist persona's avatar. A real fashion-stylist portrait photo
-// (generated once via scripts/generate-dressy-avatar.mjs, stored in Supabase).
-// Falls back to a serif "D" monogram disc if the image can't load.
-
-// `v` busts CDN/browser cache when the avatar image is replaced.
-const AVATAR_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/wardrobe-images/dressy/avatar.png?v=2`
-  : "";
+import { SafeImage } from "@/components/safe-image";
 
 export function DressyAvatar({
   size = 48,
@@ -23,11 +16,14 @@ export function DressyAvatar({
       role="img"
       aria-label="Dressy, your stylist"
     >
-      {AVATAR_URL ? (
-        <img src={AVATAR_URL} alt="Dressy" width={size} height={size} loading="lazy" />
-      ) : (
-        <span className="dressy-avatar-fallback" aria-hidden="true">D</span>
-      )}
+      <SafeImage
+        src="/images/dressy.png"
+        alt="Dressy"
+        width={size}
+        height={size}
+        loading="lazy"
+        fallback={<span className="dressy-avatar-fallback" aria-hidden="true">D</span>}
+      />
     </span>
   );
 }

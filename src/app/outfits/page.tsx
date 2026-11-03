@@ -27,14 +27,29 @@ export default function OutfitsPage() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [sharing, setSharing] = useState<OutfitCandidate | null>(null);
   const [itemsLoaded, setItemsLoaded] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let active = true;
     authedFetch(`/api/items?userId=${encodeURIComponent(userId)}`)
-      .then((response) => response.json())
-      .then((data) => setItems(data.items ?? []))
-      .finally(() => setItemsLoaded(true));
-  }, [userId]);
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Wardrobe unavailable");
+        return response.json();
+      })
+      .then((data) => {
+        if (active) {
+          setItems(data.items ?? []);
+          setLoadError("");
+        }
+      })
+      .catch(() => {
+        if (active) setLoadError("Your wardrobe is temporarily unavailable. Please try again.");
+      })
+      .finally(() => { if (active) setItemsLoaded(true); });
+    return () => { active = false; };
+  }, [userId, loadAttempt]);
 
   // Cycle the "AI is working" copy so loading feels alive, not a dead spinner.
   useEffect(() => {
@@ -51,24 +66,33 @@ export default function OutfitsPage() {
     setAcceptedId(null);
     setActiveIdx(0);
     setMessage("");
-    const response = await authedFetch("/api/outfits", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, occasion }),
-    });
-    const data = await response.json();
-    setIsLoading(false);
+    try {
+      const response = await authedFetch("/api/outfits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, occasion }),
+      });
+      const data = await response.json().catch(() => ({}));
 
-    if (!response.ok) {
-      setOutfits([]);
-      const missing = (data.missing ?? []).map(categoryLabel).join(", ");
-      setMessage(`Missing: ${missing}. Add a top, a bottom and shoes first.`);
-      return;
+      if (!response.ok) {
+        setOutfits([]);
+        if (response.status >= 500) {
+          setMessage("Dressy couldn't load your wardrobe. Please try again.");
+          return;
+        }
+        const missing = (data.missing ?? []).map(categoryLabel).join(", ");
+        setMessage(`Missing: ${missing}. Add a top, a bottom and shoes first.`);
+        return;
+      }
+
+      setOutfits(data.outfits ?? []);
+      setItems(data.items ?? items);
+      setMessage((data.outfits ?? []).length ? "Here's what Dressy picked — swipe to browse." : "Dressy couldn't pull a look this time. Try another occasion.");
+    } catch {
+      setMessage("Dressy couldn't load your wardrobe. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-
-    setOutfits(data.outfits ?? []);
-    setItems(data.items ?? items);
-    setMessage((data.outfits ?? []).length ? "Here's what Dressy picked — swipe to browse." : "Dressy couldn't pull a look this time. Try another occasion.");
   }
 
   async function accept(outfitId: string) {
@@ -134,11 +158,20 @@ export default function OutfitsPage() {
           ))}
         </div>
         <input value={occasion} onChange={(event) => setOccasion(event.target.value)} placeholder="e.g. interview tomorrow, want to look sharp" />
-        <button className="primary-button full-width" disabled={isLoading} onClick={generate} type="button">
+        <button className="primary-button full-width" disabled={isLoading || Boolean(loadError)} onClick={generate} type="button">
           {isLoading ? loadingPhrases[phraseIdx] : "Generate looks"}
         </button>
         {message ? <p className="status-text">{message}</p> : null}
       </section>
+
+      {loadError ? (
+        <div role="alert">
+          <p className="status-text status-error">{loadError}</p>
+          <button className="secondary-button" type="button" onClick={() => {
+            setLoadAttempt((attempt) => attempt + 1);
+          }}>Try again</button>
+        </div>
+      ) : null}
 
       {isLoading ? (
         <div className="dressy-working" role="status">
@@ -181,7 +214,7 @@ export default function OutfitsPage() {
             </div>
           ) : null}
         </section>
-      ) : itemsLoaded && !isLoading && !items.length ? (
+      ) : itemsLoaded && !loadError && !isLoading && !items.length ? (
         <EmptyState title="Dressy needs a little more to work with" copy="Add at least a top, a bottom and a pair of shoes, and she'll style a full look for you." />
       ) : null}
 

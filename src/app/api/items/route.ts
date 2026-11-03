@@ -6,8 +6,16 @@ import { getRequestUserId } from "@/lib/supabase/request-user";
 
 export async function GET(request: NextRequest) {
   const userId = await getRequestUserId(request, request.nextUrl.searchParams.get("userId") || "server-demo-user");
-  const items = await repository.listItems(userId);
-  return NextResponse.json({ items });
+  try {
+    const items = await repository.listItems(userId);
+    return NextResponse.json({ items });
+  } catch (error) {
+    console.error("[items] Unable to load wardrobe:", error);
+    return NextResponse.json(
+      { error: "Your wardrobe is temporarily unavailable. Please try again." },
+      { status: 503, headers: { "Retry-After": "30", "Cache-Control": "no-store" } },
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {

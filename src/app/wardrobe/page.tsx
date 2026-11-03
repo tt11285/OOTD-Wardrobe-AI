@@ -23,15 +23,30 @@ export default function WardrobePage() {
   const { userId } = useAuth();
   const [items, setItems] = useState<StoredClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [filter, setFilter] = useState<ClothingCategory | "all">("all");
   const [editing, setEditing] = useState<StoredClothingItem | null>(null);
 
   useEffect(() => {
+    let active = true;
     authedFetch(`/api/items?userId=${encodeURIComponent(userId)}`)
-      .then((response) => response.json())
-      .then((data) => setItems(data.items ?? []))
-      .finally(() => setLoading(false));
-  }, [userId]);
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Wardrobe unavailable");
+        return response.json();
+      })
+      .then((data) => {
+        if (active) {
+          setItems(data.items ?? []);
+          setLoadError("");
+        }
+      })
+      .catch(() => {
+        if (active) setLoadError("Your wardrobe is temporarily unavailable. Please try again.");
+      })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [userId, loadAttempt]);
 
   // Group into category sections when viewing All; otherwise one section.
   const groups =
@@ -69,6 +84,14 @@ export default function WardrobePage() {
             </div>
           ))}
         </section>
+      ) : loadError ? (
+        <div role="alert">
+          <p className="status-text status-error">{loadError}</p>
+          <button className="secondary-button" type="button" onClick={() => {
+            setLoading(true);
+            setLoadAttempt((attempt) => attempt + 1);
+          }}>Try again</button>
+        </div>
       ) : items.length ? (
         <>
           <div className="filter-row">

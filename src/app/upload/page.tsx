@@ -1,5 +1,7 @@
 "use client";
 
+import { SafeImage } from "@/components/safe-image";
+
 import { useRef, useState } from "react";
 import { BottomNav } from "@/components/bottom-nav";
 import { TagInput } from "@/components/tag-input";
@@ -469,7 +471,7 @@ function ConfirmCard({
   return (
     <article className="confirm-card">
       <div className="review-card-image">
-        {item.imageUrl ? <img alt={item.name} src={item.imageUrl} /> : <div className="review-card-no-image">No image</div>}
+        <SafeImage alt={item.name} src={item.imageUrl} fallback={<div className="review-card-no-image">No image</div>} />
       </div>
       <div className="review-fields">
         <span className={`status-badge ${hint.cls}`}>{hint.label}</span>

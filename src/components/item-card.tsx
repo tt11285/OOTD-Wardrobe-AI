@@ -1,5 +1,6 @@
 import type { StoredClothingItem } from "@/lib/storage/repository";
 import { categoryLabel } from "@/lib/domain/outfits";
+import { SafeImage } from "@/components/safe-image";
 
 // A pale icon placeholder shown when no real image is available yet
 function NoImagePlaceholder({ name }: { name: string }) {
@@ -23,18 +24,6 @@ function NoImagePlaceholder({ name }: { name: string }) {
   );
 }
 
-// A valid clothing photo has at least ~500 base64 chars (> 375 bytes).
-// The 1×1 placeholder PNGs in the database are only 114 chars.
-function isRealImage(url: string): boolean {
-  if (!url) return false;
-  if (url.startsWith("http")) return true; // Supabase Storage CDN URL
-  if (url.startsWith("data:")) {
-    const b64 = url.split(",")[1] ?? "";
-    return b64.length > 300; // real photo is much larger
-  }
-  return false;
-}
-
 export function ItemCard({
   item,
   onEdit,
@@ -45,11 +34,12 @@ export function ItemCard({
   return (
     <article className="item-card">
       <div className="item-image-wrap">
-        {isRealImage(item.imageUrl) ? (
-          <img alt={item.name} className="item-image" src={item.imageUrl} />
-        ) : (
-          <NoImagePlaceholder name={item.name} />
-        )}
+        <SafeImage
+          alt={item.name}
+          className="item-image"
+          src={item.imageUrl}
+          fallback={<NoImagePlaceholder name={item.name} />}
+        />
         {onEdit ? (
           <button
             className="item-edit-btn"

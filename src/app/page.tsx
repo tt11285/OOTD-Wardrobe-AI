@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { DressyAvatar } from "@/components/dressy-avatar";
+import { SafeImage } from "@/components/safe-image";
 import type { StoredClothingItem } from "@/lib/storage/repository";
 
 type TabKey = "OOTD" | "ADD" | "WARDROBE" | "OUTFITS";
@@ -59,10 +60,6 @@ function PhoneFrame({ children, label, active }: { children: React.ReactNode; la
       </div>
     </div>
   );
-}
-
-function img(item?: StoredClothingItem): string | undefined {
-  return item?.imageUrl?.startsWith("http") ? item.imageUrl : undefined;
 }
 
 export default function HomePage() {
@@ -124,7 +121,7 @@ export default function HomePage() {
             </div>
             <div className="phone-confirm">
               <div className="phone-confirm-img">
-                {img(first("top")) ? <img src={img(first("top"))} alt="" /> : <span className="ph-fill" />}
+                <SafeImage src={first("top")?.imageUrl} alt="" fallback={<span className="ph-fill" />} />
               </div>
               <div className="phone-confirm-meta">
                 <span className="phone-confirm-badge">High confidence</span>
@@ -147,7 +144,7 @@ export default function HomePage() {
               {grid.length
                 ? grid.map((it) => (
                     <span className="phone-grid-cell" key={it.id}>
-                      {img(it) ? <img src={img(it)} alt="" /> : <span className="ph-fill" />}
+                      <SafeImage src={it.imageUrl} alt="" fallback={<span className="ph-fill" />} />
                     </span>
                   ))
                 : Array.from({ length: 6 }).map((_, i) => <span className="phone-grid-cell" key={i}><span className="ph-fill" /></span>)}
@@ -162,7 +159,7 @@ export default function HomePage() {
               <div className="phone-outfit-collage">
                 {(look.length ? look : [undefined, undefined, undefined, undefined]).slice(0, 4).map((it, i) => (
                   <span key={it?.id ?? i}>
-                    {img(it) ? <img src={img(it)} alt="" /> : <span className="ph-fill" />}
+                    <SafeImage src={it?.imageUrl} alt="" fallback={<span className="ph-fill" />} />
                     <i>{it?.category ?? ["top", "bottom", "shoes", "outer"][i]}</i>
                   </span>
                 ))}

@@ -3,13 +3,7 @@
 import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import type { OutfitCandidate, OutfitPiece, StoredClothingItem } from "@/lib/storage/repository";
-
-function realImg(url?: string): boolean {
-  if (!url) return false;
-  if (url.startsWith("http")) return true;
-  if (url.startsWith("data:")) return (url.split(",")[1]?.length ?? 0) > 300;
-  return false;
-}
+import { SafeImage } from "@/components/safe-image";
 
 // A shareable, screenshot-ready OOTD card with a PNG download (best-effort).
 export function ShareCard({
@@ -62,7 +56,7 @@ export function ShareCard({
           <div className="share-card-collage">
             {pieces.map((p, i) => (
               <span key={p.itemId ?? `${p.name}-${i}`}>
-                {realImg(p.imageUrl) ? <img src={p.imageUrl} alt={p.name} crossOrigin="anonymous" /> : null}
+                <SafeImage src={p.imageUrl} alt={p.name} crossOrigin="anonymous" fallback={<small>{p.name}</small>} />
               </span>
             ))}
           </div>
